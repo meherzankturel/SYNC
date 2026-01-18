@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Boundless",
+    "slug": "boundless",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.boundless.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.boundless.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-video"
+    ],
+    "scheme": "boundless",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "eac426b3-55ca-4fcf-a18e-44756dafae07"
+      }
+    },
+    "owner": "meherzan"
+  }
+}
