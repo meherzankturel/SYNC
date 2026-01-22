@@ -17,7 +17,7 @@ import { db } from '../config/firebase';
 export type MoodType = 'happy' | 'calm' | 'neutral' | 'sad' | 'anxious' | 'excited' | 'grateful' | 'loved';
 
 // Mood causes - why do you feel this way?
-export type MoodCause = 
+export type MoodCause =
   | 'partner'      // 💕 My Partner
   | 'work'         // 💼 Work
   | 'health'       // 🏃 Health
@@ -49,6 +49,7 @@ export interface Mood {
   mood: MoodType;
   note?: string;
   cause?: MoodCause;        // Why do you feel this way?
+  customEmoji?: string;      // User-selected custom emoji (optional)
   reactions?: MoodReactionData[]; // Partner's reactions
   createdAt: any;
   updatedAt: any;
@@ -98,24 +99,24 @@ export class MoodService {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
-      
+
       // Only include note if it's provided and not empty
       if (note && note.trim()) {
         moodData.note = note.trim();
       }
-      
+
       // Include cause if selected
       if (cause) {
         moodData.cause = cause;
       }
-      
+
       const docRef = await addDoc(collection(db, 'moods'), moodData);
       return docRef.id;
     } catch (error: any) {
       throw new Error(error.message || 'Failed to submit mood');
     }
   }
-  
+
   /**
    * React to partner's mood
    */
@@ -138,7 +139,7 @@ export class MoodService {
       throw new Error(error.message || 'Failed to react to mood');
     }
   }
-  
+
   /**
    * Get mood insights for a pair (last 7 days)
    */
@@ -159,7 +160,7 @@ export class MoodService {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       sevenDaysAgo.setHours(0, 0, 0, 0);
-      
+
       const moodsRef = collection(db, 'moods');
       const q = query(
         moodsRef,
@@ -167,13 +168,13 @@ export class MoodService {
         where('createdAt', '>=', Timestamp.fromDate(sevenDaysAgo)),
         orderBy('createdAt', 'desc')
       );
-      
+
       const snapshot = await getDocs(q);
       const moods = snapshot.docs.map(doc => doc.data() as Mood);
-      
+
       const userMoods = moods.filter(m => m.userId === userId);
       const partnerMoods = moods.filter(m => m.userId === partnerId);
-      
+
       // Count happy days (happy, excited, loved, grateful)
       const happyTypes = ['happy', 'excited', 'loved', 'grateful'];
       const userHappyDays = new Set(
@@ -181,18 +182,18 @@ export class MoodService {
           .filter(m => happyTypes.includes(m.mood))
           .map(m => new Date(m.createdAt?.toDate?.() || m.createdAt).toDateString())
       ).size;
-      
+
       const partnerHappyDays = new Set(
         partnerMoods
           .filter(m => happyTypes.includes(m.mood))
           .map(m => new Date(m.createdAt?.toDate?.() || m.createdAt).toDateString())
       ).size;
-      
+
       // Count synced days (both shared moods on same day)
       const userDays = new Set(userMoods.map(m => new Date(m.createdAt?.toDate?.() || m.createdAt).toDateString()));
       const partnerDays = new Set(partnerMoods.map(m => new Date(m.createdAt?.toDate?.() || m.createdAt).toDateString()));
       const syncedDays = [...userDays].filter(day => partnerDays.has(day)).length;
-      
+
       // Find top moods
       const countMoods = (moodsList: Mood[]): MoodType | null => {
         const counts: Record<string, number> = {};
@@ -203,12 +204,12 @@ export class MoodService {
         if (entries.length === 0) return null;
         return entries.sort((a, b) => b[1] - a[1])[0][0] as MoodType;
       };
-      
+
       // Count "loved" moments (when cause is 'partner' or mood is 'loved')
       const lovedMoments = moods.filter(
         m => m.mood === 'loved' || m.cause === 'partner' || m.cause === 'missing_you'
       ).length;
-      
+
       return {
         userHappyDays,
         partnerHappyDays,
@@ -231,7 +232,7 @@ export class MoodService {
       };
     }
   }
-  
+
   /**
    * Get mood timeline for a pair
    */
@@ -247,7 +248,7 @@ export class MoodService {
         orderBy('createdAt', 'desc'),
         limit(limitCount)
       );
-      
+
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({
         id: doc.id,
@@ -257,7 +258,7 @@ export class MoodService {
       throw new Error(error.message || 'Failed to get mood timeline');
     }
   }
-  
+
   /**
    * Get today's mood for a user
    */
@@ -266,7 +267,7 @@ export class MoodService {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const todayTimestamp = Timestamp.fromDate(today);
-      
+
       const moodsRef = collection(db, 'moods');
       const q = query(
         moodsRef,
@@ -276,7 +277,7 @@ export class MoodService {
         orderBy('createdAt', 'desc'),
         limit(1)
       );
-      
+
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
         const doc = snapshot.docs[0];

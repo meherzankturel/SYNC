@@ -141,6 +141,7 @@ export class WeatherService {
         const weatherId = data.weather?.[0]?.id || 0;
         const condition = this.getConditionFromId(weatherId);
         const isSevere = SEVERE_WEATHER_IDS.includes(weatherId) || SEVERE_CONDITIONS.includes(condition);
+        const severity = this.getSeverityLevel(weatherId, condition);
 
         return {
             temp: Math.round(data.main?.temp || 0),
@@ -151,7 +152,33 @@ export class WeatherService {
             windSpeed: Math.round(data.wind?.speed || 0),
             condition,
             isSevere,
+            alerts: isSevere ? [{
+                event: data.weather?.[0]?.main || 'Severe Weather',
+                description: data.weather?.[0]?.description || '',
+                start: new Date(),
+                end: new Date(Date.now() + 3 * 60 * 60 * 1000), // 3 hours
+                severity,
+            }] : undefined,
         };
+    }
+
+    /**
+     * Determine severity level based on weather condition ID
+     */
+    private static getSeverityLevel(weatherId: number, condition: WeatherCondition): 'minor' | 'moderate' | 'severe' | 'extreme' {
+        // Extreme: Tornado, severe thunderstorm
+        if (weatherId === 781 || weatherId >= 200 && weatherId <= 202) return 'extreme';
+
+        // Severe: Heavy rain/snow, freezing rain
+        if (weatherId === 511 || weatherId === 602 || weatherId === 621 || weatherId === 622) return 'severe';
+        if (weatherId >= 210 && weatherId <= 221) return 'severe'; // Thunderstorms
+
+        // Moderate: Light thunderstorms, moderate snow
+        if (weatherId >= 230 && weatherId <= 232) return 'moderate'; // Drizzle with thunder
+        if (condition === 'snow') return 'moderate';
+
+        // Minor: Everything else that's flagged as severe
+        return 'minor';
     }
 
     /**
