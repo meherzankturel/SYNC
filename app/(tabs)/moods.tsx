@@ -848,9 +848,9 @@ export default function MoodsScreen() {
                 {todayMood ? (
                   <>
                     <View style={[styles.todayMoodIcon, { backgroundColor: moodColors[todayMood.mood] + '20' }]}>
-                      <Text style={styles.todayMoodEmoji}>{moodEmojis[todayMood.mood]}</Text>
+                      <Text style={styles.todayMoodEmoji}>{todayMood.customEmoji || moodEmojis[todayMood.mood]}</Text>
                     </View>
-                    <Text style={styles.todayMoodType}>{moodLabels[todayMood.mood]}</Text>
+                    <Text style={styles.todayMoodType}>{todayMood.customEmoji ? 'Custom' : moodLabels[todayMood.mood]}</Text>
                     {todayMood.cause && (
                       <Text style={styles.todayCause}>
                         {MOOD_CAUSES.find(c => c.type === todayMood.cause)?.emoji} {MOOD_CAUSES.find(c => c.type === todayMood.cause)?.label}

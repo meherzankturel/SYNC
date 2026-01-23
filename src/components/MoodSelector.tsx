@@ -209,13 +209,19 @@ export default function MoodSelector({ visible, onClose, onSubmit, loading = fal
                       {/* Emoji Picker on Step 1 */}
                       {showEmojiPicker && (
                         <View style={styles.emojiPickerContainer}>
-                          <EmojiSelector
-                            onEmojiSelected={handleEmojiSelect}
-                            showSearchBar={false}
-                            showTabs={true}
-                            showHistory={false}
-                            columns={8}
-                          />
+                          <ScrollView
+                            horizontal={false}
+                            nestedScrollEnabled={true}
+                            style={{ flex: 1 }}
+                          >
+                            <EmojiSelector
+                              onEmojiSelected={handleEmojiSelect}
+                              showSearchBar={false}
+                              showTabs={true}
+                              showHistory={false}
+                              columns={8}
+                            />
+                          </ScrollView>
                         </View>
                       )}
                     </>
