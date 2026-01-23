@@ -1882,60 +1882,7 @@ export default function HomeScreen() {
                                 </View>
 
 
-                                {/* OUR MOODS SECTION */}
-                                <View style={styles.moodsSection}>
-                                    <Text style={styles.sectionTitle}>Our Moods</Text>
-                                    <View style={styles.moodsRow}>
-                                        {/* Your Mood */}
-                                        <TouchableOpacity
-                                            style={styles.moodItem}
-                                            onPress={() => setShowMoodModal(true)}
-                                        >
-                                            <View style={styles.moodAvatarContainer}>
-                                                <View style={styles.moodAvatar}>
-                                                    <Text style={styles.moodAvatarText}>
-                                                        {userData?.name?.charAt(0) || '?'}
-                                                    </Text>
-                                                </View>
-                                                {todaysMood && (
-                                                    <View style={styles.moodBadge}>
-                                                        <Text style={styles.moodEmoji}>{todaysMood}</Text>
-                                                    </View>
-                                                )}
-                                            </View>
-                                            <Text style={styles.moodLabel}>
-                                                {todaysMood ? 'Feeling Good' : 'Set Mood'}
-                                            </Text>
-                                            <Text style={styles.moodName}>
-                                                {userData?.name?.split(' ')[0] || 'You'}
-                                            </Text>
-                                        </TouchableOpacity>
-
-                                        {/* Partner Mood */}
-                                        <View style={styles.moodItem}>
-                                            <View style={styles.moodAvatarContainer}>
-                                                <View style={[styles.moodAvatar, styles.moodAvatarPartner]}>
-                                                    <Text style={styles.moodAvatarText}>
-                                                        {partnerData?.name?.charAt(0) || '?'}
-                                                    </Text>
-                                                </View>
-                                                {partnerMood && (
-                                                    <View style={styles.moodBadge}>
-                                                        <Text style={styles.moodEmoji}>{partnerMood.emoji}</Text>
-                                                    </View>
-                                                )}
-                                            </View>
-                                            <Text style={styles.moodLabel}>
-                                                {partnerMood?.label || 'No mood yet'}
-                                            </Text>
-                                            <Text style={styles.moodNamePartner}>
-                                                {partnerData?.name?.split(' ')[0] || 'Partner'}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-
-                                {/* DAILY ECHO PROMPT */}
+                                {/* DAILY ECHO PROMPT - Mood section removed, use Moods tab instead */}
                                 <View style={styles.dailyEchoCard}>
                                     <View style={styles.dailyEchoHeader}>
                                         <View style={styles.dailyEchoIcon}>
@@ -2004,14 +1951,6 @@ export default function HomeScreen() {
                             </View>
                         )}
                     </ScrollView>
-
-                    {/* MOOD SELECTION MODAL */}
-                    <MoodSelector
-                        visible={showMoodModal}
-                        onClose={() => setShowMoodModal(false)}
-                        onSubmit={handleMoodSelect}
-                        loading={updatingMood}
-                    />
 
                     {/* PHOTO VIEWER MODAL */}
                     <PhotoViewerModal

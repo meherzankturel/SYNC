@@ -199,7 +199,7 @@ export default function MoodSelector({ visible, onClose, onSubmit, loading = fal
                               styles.moodButton,
                               customEmoji && { backgroundColor: theme.colors.primary + '20', borderColor: theme.colors.primary },
                             ]}
-                            onPress={() => setShowEmojiPicker(!showEmojiPicker)}
+                            onPress={() => setShowEmojiPicker(true)}
                             activeOpacity={0.7}
                           >
                             <Text style={styles.emoji}>{customEmoji || '➕'}</Text>
