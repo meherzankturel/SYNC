@@ -164,29 +164,59 @@ export default function MoodSelector({ visible, onClose, onSubmit, loading = fal
                 <View style={styles.content}>
                   {step === 'mood' ? (
                     /* Mood Selection Grid */
-                    <View style={styles.grid}>
-                      {MOODS.map((mood) => {
-                        const isSelected = selectedMood === mood.type;
-                        return (
-                          <TouchableOpacity
-                            key={mood.type}
-                            style={[
-                              styles.moodButton,
-                              isSelected && { backgroundColor: mood.color + '20', borderColor: mood.color },
-                              loading && styles.disabledButton,
-                            ]}
-                            onPress={() => handleMoodSelect(mood.type)}
-                            disabled={loading}
-                            activeOpacity={0.7}
-                          >
-                            <Text style={[styles.emoji, isSelected && styles.emojiSelected]}>{mood.emoji}</Text>
-                            <Text style={[styles.label, isSelected && { color: mood.color, fontWeight: '700' }]}>
-                              {mood.label}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
+                    <>
+                      <View style={styles.grid}>
+                        {MOODS.map((mood) => {
+                          const isSelected = selectedMood === mood.type;
+                          return (
+                            <TouchableOpacity
+                              key={mood.type}
+                              style={[
+                                styles.moodButton,
+                                isSelected && { backgroundColor: mood.color + '20', borderColor: mood.color },
+                                loading && styles.disabledButton,
+                              ]}
+                              onPress={() => handleMoodSelect(mood.type)}
+                              disabled={loading}
+                              activeOpacity={0.7}
+                            >
+                              <Text style={[styles.emoji, isSelected && styles.emojiSelected]}>{mood.emoji}</Text>
+                              <Text style={[styles.label, isSelected && { color: mood.color, fontWeight: '700' }]}>
+                                {mood.label}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+
+                        {/* Add Custom Emoji Button in Grid */}
+                        <TouchableOpacity
+                          style={[
+                            styles.moodButton,
+                            customEmoji && { backgroundColor: theme.colors.primary + '20', borderColor: theme.colors.primary },
+                          ]}
+                          onPress={() => setShowEmojiPicker(!showEmojiPicker)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={styles.emoji}>{customEmoji || '➕'}</Text>
+                          <Text style={[styles.label, customEmoji && { color: theme.colors.primary, fontWeight: '700' }]}>
+                            {customEmoji ? 'Custom' : 'Add'}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      {/* Emoji Picker on Step 1 */}
+                      {showEmojiPicker && (
+                        <View style={styles.emojiPickerContainer}>
+                          <EmojiSelector
+                            onEmojiSelected={handleEmojiSelect}
+                            showSearchBar={false}
+                            showTabs={true}
+                            showHistory={false}
+                            columns={8}
+                          />
+                        </View>
+                      )}
+                    </>
                   ) : (
                     /* Optional details */
                     <View style={styles.causeSection}>
@@ -259,7 +289,7 @@ export default function MoodSelector({ visible, onClose, onSubmit, loading = fal
           </Animated.View>
         </KeyboardAvoidingView>
       </Pressable>
-    </Modal>
+    </Modal >
   );
 }
 
