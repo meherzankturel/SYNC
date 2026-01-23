@@ -93,6 +93,8 @@ export default function MoodSelector({ visible, onClose, onSubmit, loading = fal
   };
 
   const getMoodEmoji = () => {
+    // If custom emoji is set, use it
+    if (customEmoji) return customEmoji;
     if (!selectedMood) return '💭';
     return MOODS.find(m => m.type === selectedMood)?.emoji || '💭';
   };
@@ -227,32 +229,12 @@ export default function MoodSelector({ visible, onClose, onSubmit, loading = fal
                             <Text style={styles.charCount}>{note.length}/200</Text>
                           )}
                         </View>
-
-                        {/* Custom Emoji Picker Button */}
-                        <TouchableOpacity
-                          style={styles.customEmojiButton}
-                          onPress={() => setShowEmojiPicker(!showEmojiPicker)}
-                        >
-                          <Ionicons
-                            name={customEmoji ? "happy" : "happy-outline"}
-                            size={20}
-                            color={theme.colors.primary}
-                          />
-                          <Text style={styles.customEmojiText}>
-                            {customEmoji ? `Custom: ${customEmoji}` : 'Pick Custom Emoji'}
-                          </Text>
-                        </TouchableOpacity>
-
-                        {/* Emoji Picker */}
-                        {showEmojiPicker && (
-                          <View style={styles.emojiPickerContainer}>
-                            <EmojiSelector
-                              onEmojiSelected={handleEmojiSelect}
-                              showSearchBar={false}
-                              showTabs={true}
-                              showHistory={false}
-                              columns={8}
-                            />
+                        {/* Show selected custom emoji indicator */}
+                        {customEmoji && (
+                          <View style={styles.customEmojiIndicator}>
+                            <Text style={styles.customEmojiIndicatorText}>
+                              Selected: {customEmoji}
+                            </Text>
                           </View>
                         )}
 
@@ -552,5 +534,17 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text,
+  },
+  customEmojiIndicator: {
+    backgroundColor: theme.colors.primary + '15',
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
+    marginTop: theme.spacing.sm,
+    alignItems: 'center',
+  },
+  customEmojiIndicatorText: {
+    fontSize: 16,
+    color: theme.colors.primary,
+    fontWeight: '600',
   },
 });
