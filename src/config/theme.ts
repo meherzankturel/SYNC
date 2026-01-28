@@ -1,5 +1,7 @@
 // Design System - "SYNC" Theme
 // Light, playful doodle aesthetic with purple/pink accents
+import { ResponsiveUtils } from '../utils/responsive';
+const { scale, fontScale, moderateScale, verticalScale } = ResponsiveUtils;
 
 export const theme = {
   colors: {
@@ -108,16 +110,16 @@ export const theme = {
     },
 
     fontSize: {
-      xs: 10,
-      sm: 12,
-      base: 14,
-      md: 16,
-      lg: 18,
-      xl: 20,
-      '2xl': 24,
-      '3xl': 28,
-      '4xl': 36,
-      '5xl': 48,
+      xs: fontScale(10),
+      sm: fontScale(12),
+      base: fontScale(14),
+      md: fontScale(16),
+      lg: fontScale(18),
+      xl: fontScale(20),
+      '2xl': fontScale(24),
+      '3xl': fontScale(28),
+      '4xl': fontScale(36),
+      '5xl': fontScale(48),
     },
 
     fontWeight: {
@@ -144,24 +146,24 @@ export const theme = {
   },
 
   spacing: {
-    xs: 4,
-    sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-    '2xl': 48,
-    '3xl': 64,
+    xs: moderateScale(4),
+    sm: moderateScale(8),
+    md: moderateScale(16),
+    lg: moderateScale(24),
+    xl: moderateScale(32),
+    '2xl': moderateScale(48),
+    '3xl': moderateScale(64),
   },
 
   borderRadius: {
-    xs: 4,
-    sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 20,
-    '2xl': 24,
-    '3xl': 32,
-    pill: 50,
+    xs: moderateScale(4),
+    sm: moderateScale(8),
+    md: moderateScale(12),
+    lg: moderateScale(16),
+    xl: moderateScale(20),
+    '2xl': moderateScale(24),
+    '3xl': moderateScale(32),
+    pill: 50, // Usually kept constant or very large
     full: 9999,
   },
 
@@ -262,31 +264,31 @@ export const theme = {
   components: {
     // Tab bar
     tabBar: {
-      height: 80,
-      fabSize: 56,
-      iconSize: 24,
+      height: verticalScale(80),
+      fabSize: moderateScale(56),
+      iconSize: moderateScale(24),
     },
 
     // Avatar
     avatar: {
-      sm: 32,
-      md: 48,
-      lg: 64,
-      xl: 80,
+      sm: moderateScale(32),
+      md: moderateScale(48),
+      lg: moderateScale(64),
+      xl: moderateScale(80),
       borderWidth: 3,
     },
 
     // Input
     input: {
-      height: 48,
-      borderRadius: 12,
+      height: verticalScale(48),
+      borderRadius: moderateScale(12),
     },
 
     // Button
     button: {
-      heightSm: 36,
-      heightMd: 44,
-      heightLg: 52,
+      heightSm: verticalScale(36),
+      heightMd: verticalScale(44),
+      heightLg: verticalScale(52),
     },
   },
 
