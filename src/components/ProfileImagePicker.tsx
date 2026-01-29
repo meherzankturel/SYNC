@@ -33,49 +33,53 @@ export const ProfileImagePicker: React.FC<ProfileImagePickerProps> = ({
 
     const handleSelectImage = async () => {
         setShowOptions(false);
-        setIsLoading(true);
-
-        try {
-            const imageUri = await ProfileService.pickProfileImage();
-            if (imageUri) {
-                const uploadedUrl = await ProfileService.uploadProfileImage(userId, imageUri);
-                if (uploadedUrl) {
-                    onImageUpdated(uploadedUrl);
-                    // Update widget with new avatar
-                    WidgetService.updateYourProfile(userName, uploadedUrl);
-                } else {
-                    Alert.alert('Upload Failed', 'Could not upload your profile photo. Please try again.');
+        // Small delay to ensure modal is closed before launching system UI
+        setTimeout(async () => {
+            setIsLoading(true);
+            try {
+                const imageUri = await ProfileService.pickProfileImage();
+                if (imageUri) {
+                    const uploadedUrl = await ProfileService.uploadProfileImage(userId, imageUri);
+                    if (uploadedUrl) {
+                        onImageUpdated(uploadedUrl);
+                        // Update widget with new avatar
+                        WidgetService.updateYourProfile(userName, uploadedUrl);
+                    } else {
+                        Alert.alert('Upload Failed', 'Could not upload your profile photo. Please try again.');
+                    }
                 }
+            } catch (error) {
+                console.error('Error selecting image:', error);
+                Alert.alert('Error', 'Failed to update profile photo.');
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.error('Error selecting image:', error);
-            Alert.alert('Error', 'Failed to update profile photo.');
-        } finally {
-            setIsLoading(false);
-        }
+        }, 300);
     };
 
     const handleTakePhoto = async () => {
         setShowOptions(false);
-        setIsLoading(true);
-
-        try {
-            const imageUri = await ProfileService.takeProfilePhoto();
-            if (imageUri) {
-                const uploadedUrl = await ProfileService.uploadProfileImage(userId, imageUri);
-                if (uploadedUrl) {
-                    onImageUpdated(uploadedUrl);
-                    WidgetService.updateYourProfile(userName, uploadedUrl);
-                } else {
-                    Alert.alert('Upload Failed', 'Could not upload your profile photo. Please try again.');
+        // Small delay to ensure modal is closed before launching system UI
+        setTimeout(async () => {
+            setIsLoading(true);
+            try {
+                const imageUri = await ProfileService.takeProfilePhoto();
+                if (imageUri) {
+                    const uploadedUrl = await ProfileService.uploadProfileImage(userId, imageUri);
+                    if (uploadedUrl) {
+                        onImageUpdated(uploadedUrl);
+                        WidgetService.updateYourProfile(userName, uploadedUrl);
+                    } else {
+                        Alert.alert('Upload Failed', 'Could not upload your profile photo. Please try again.');
+                    }
                 }
+            } catch (error) {
+                console.error('Error taking photo:', error);
+                Alert.alert('Error', 'Failed to take profile photo.');
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.error('Error taking photo:', error);
-            Alert.alert('Error', 'Failed to take profile photo.');
-        } finally {
-            setIsLoading(false);
-        }
+        }, 300);
     };
 
     const handleRemovePhoto = async () => {

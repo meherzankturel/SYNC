@@ -21,24 +21,28 @@ export function SwipeableTabWrapper({ children, tabIndex, totalTabs, enabled = t
   const startX = useRef(0);
 
   // Keep refs in sync
+  const enabledRef = useRef(enabled);
   useEffect(() => {
     routerRef.current = router;
     segmentsRef.current = segments;
     tabIndexRef.current = tabIndex;
     totalTabsRef.current = totalTabs;
-  }, [router, segments, tabIndex, totalTabs]);
+    enabledRef.current = enabled;
+  }, [router, segments, tabIndex, totalTabs, enabled]);
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
       onStartShouldSetPanResponderCapture: () => false,
       onMoveShouldSetPanResponder: (evt, gestureState) => {
+        if (!enabledRef.current) return false;
         // Only respond to horizontal swipes
         const isHorizontal = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
         const hasEnoughMovement = Math.abs(gestureState.dx) > 15;
         return isHorizontal && hasEnoughMovement;
       },
       onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
+        if (!enabledRef.current) return false;
         // Highly sensitive horizontal capture to beat ScrollView
         const isHorizontal = Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 1.5;
         const hasEnoughMovement = Math.abs(gestureState.dx) > 10;

@@ -262,6 +262,9 @@ export class WeatherService {
         weather: WeatherData,
         yourName: string
     ): Promise<void> {
+        // Feature disabled as requested
+        return;
+
         if (!weather.isSevere || !partnerPushToken) return;
 
         try {

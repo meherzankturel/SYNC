@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../config/theme';
 import { WobblyCard } from './index';
@@ -16,6 +16,10 @@ interface DoodleDateCardProps {
     onDelete: () => void;
     onComplete?: () => void;
     onAction?: () => void; // FaceTime or actions
+    userReview?: any;
+    partnerReview?: any;
+    allMediaItems?: Array<{ uri: string; type: 'image' | 'video' }>;
+    onMediaPress?: (items: Array<{ uri: string; type: 'image' | 'video' }>, index: number) => void;
 }
 
 export const DoodleDateCard: React.FC<DoodleDateCardProps> = ({
@@ -29,7 +33,11 @@ export const DoodleDateCard: React.FC<DoodleDateCardProps> = ({
     onEdit,
     onDelete,
     onComplete,
-    onAction
+    onAction,
+    userReview,
+    partnerReview,
+    allMediaItems,
+    onMediaPress
 }) => {
     const handwritingFont = Platform.OS === 'ios' ? 'Noteworthy-Bold' : 'sans-serif-medium';
 
@@ -64,18 +72,75 @@ export const DoodleDateCard: React.FC<DoodleDateCardProps> = ({
                         {formatDate(date)} • {formatTime(date)}
                     </Text>
 
-                    {/* Image Block */}
+                    {/* Review Stars for Past Dates */}
+                    {!isUpcoming && (userReview || partnerReview) && (
+                        <View style={styles.reviewSummary}>
+                            <View style={styles.starsRow}>
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <Ionicons
+                                        key={star}
+                                        name={star <= (userReview?.rating || partnerReview?.rating || 0) ? 'star' : 'star-outline'}
+                                        size={16}
+                                        color={star <= (userReview?.rating || partnerReview?.rating || 0) ? '#FFD700' : '#ccc'}
+                                    />
+                                ))}
+                            </View>
+                            {(userReview?.emoji || partnerReview?.emoji) && (
+                                <Text style={styles.emojiBadge}>{userReview?.emoji || partnerReview?.emoji}</Text>
+                            )}
+                        </View>
+                    )}
+
+                    {/* Image or Media Block */}
                     <View style={styles.imageContainer}>
-                        {image ? (
-                            <Image source={{ uri: image }} style={styles.image} resizeMode="cover" />
+                        {allMediaItems && allMediaItems.length > 1 ? (
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.mediaScroll}
+                            >
+                                {allMediaItems.map((item, idx) => (
+                                    <TouchableOpacity
+                                        key={idx}
+                                        onPress={() => onMediaPress?.(allMediaItems, idx)}
+                                        activeOpacity={0.8}
+                                    >
+                                        <Image source={{ uri: item.uri }} style={styles.mediaThumbnail} resizeMode="cover" />
+                                        {item.type === 'video' && (
+                                            <View style={styles.playIconOverlay}>
+                                                <Ionicons name="play" size={20} color="#fff" />
+                                            </View>
+                                        )}
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        ) : (allMediaItems && allMediaItems.length === 1) || image ? (
+                            <TouchableOpacity
+                                activeOpacity={0.9}
+                                onPress={() => {
+                                    if (allMediaItems && allMediaItems.length === 1) {
+                                        onMediaPress?.(allMediaItems, 0);
+                                    }
+                                }}
+                                disabled={!allMediaItems || allMediaItems.length === 0}
+                                style={{ width: '100%', height: '100%' }}
+                            >
+                                <Image
+                                    source={{ uri: allMediaItems?.[0]?.uri || image }}
+                                    style={styles.image}
+                                    resizeMode="cover"
+                                />
+                                {allMediaItems?.[0]?.type === 'video' && (
+                                    <View style={[styles.playIconOverlay, { right: 0 }]}>
+                                        <Ionicons name="play" size={48} color="#fff" />
+                                    </View>
+                                )}
+                            </TouchableOpacity>
                         ) : (
-                            // Fallback placeholder matching the dark vibe in example? or Category color
                             <View style={[styles.imagePlaceholder, { backgroundColor: '#333' }]}>
-                                {/* Show stars or pattern */}
                                 <View style={{ position: 'absolute', top: 20, right: 40, width: 2, height: 2, backgroundColor: '#FFF' }} />
                                 <View style={{ position: 'absolute', top: 50, left: 30, width: 2, height: 2, backgroundColor: '#FFF' }} />
                                 <View style={{ position: 'absolute', top: 30, left: 80, width: 3, height: 3, backgroundColor: '#FFF' }} />
-
                                 <Ionicons name={categoryIcon as any} size={64} color="rgba(255,255,255,0.2)" />
                             </View>
                         )}
@@ -83,9 +148,13 @@ export const DoodleDateCard: React.FC<DoodleDateCardProps> = ({
 
                     {/* Footer Row */}
                     <View style={styles.footerRow}>
-                        <View />
+                        <TouchableOpacity onPress={onDelete}>
+                            <Ionicons name="trash-outline" size={20} color={theme.colors.error} />
+                        </TouchableOpacity>
                         <TouchableOpacity onPress={onEdit}>
-                            <Text style={[styles.detailsLink, { fontFamily: handwritingFont }]}>Details</Text>
+                            <Text style={[styles.detailsLink, { fontFamily: handwritingFont }]}>
+                                {isUpcoming ? 'Details' : (userReview ? 'Edit Review' : 'Add Memory')}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -147,7 +216,41 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#000',
         textDecorationLine: 'underline',
-        textDecorationColor: '#A020F0', // Purple underline
+        textDecorationColor: '#A020F0',
         textDecorationStyle: 'solid',
+    },
+    reviewSummary: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        gap: 8,
+    },
+    starsRow: {
+        flexDirection: 'row',
+        gap: 2,
+    },
+    emojiBadge: {
+        fontSize: 18,
+    },
+    mediaScroll: {
+        paddingRight: 20,
+    },
+    mediaThumbnail: {
+        width: 140,
+        height: 180,
+        marginRight: 10,
+        borderRadius: 16,
+        backgroundColor: '#eee',
+    },
+    playIconOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 10,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        borderRadius: 16,
     }
 });

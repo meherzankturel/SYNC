@@ -3,7 +3,7 @@
  * Handles fetching reviews from MongoDB API with real-time capabilities
  */
 
-import { MONGODB_API_BASE_URL, API_ENDPOINTS } from '../config/mongodb';
+import { API_ENDPOINTS, apiRequest } from '../config/mongodb';
 
 export interface MongoDBReview {
   _id: string;
@@ -24,15 +24,9 @@ export interface MongoDBReview {
  */
 export async function getReviewsForDateNight(dateNightId: string): Promise<MongoDBReview[]> {
   try {
-    const response = await fetch(
-      `${MONGODB_API_BASE_URL}${API_ENDPOINTS.REVIEWS.GET_BY_DATE_NIGHT(dateNightId)}`
+    const reviews = await apiRequest<MongoDBReview[]>(
+      API_ENDPOINTS.REVIEWS.GET_BY_DATE_NIGHT(dateNightId)
     );
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch reviews: ${response.statusText}`);
-    }
-    
-    const reviews = await response.json();
     return reviews;
   } catch (error: any) {
     console.error('Error fetching reviews from MongoDB:', error);
@@ -54,23 +48,13 @@ export async function createReview(reviewData: {
   videos?: string[];
 }): Promise<MongoDBReview> {
   try {
-    const response = await fetch(
-      `${MONGODB_API_BASE_URL}${API_ENDPOINTS.REVIEWS.CREATE}`,
+    const review = await apiRequest<MongoDBReview>(
+      API_ENDPOINTS.REVIEWS.CREATE,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(reviewData),
       }
     );
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }));
-      throw new Error(errorData.error || `Failed to create review: ${response.statusText}`);
-    }
-    
-    const review = await response.json();
     return review;
   } catch (error: any) {
     console.error('Error creating review in MongoDB:', error);
@@ -92,7 +76,7 @@ export function startReviewPolling(
 
   const poll = async () => {
     if (!isPolling) return;
-    
+
     try {
       const reviews = await getReviewsForDateNight(dateNightId);
       onUpdate(reviews);
@@ -116,4 +100,3 @@ export function startReviewPolling(
     }
   };
 }
-

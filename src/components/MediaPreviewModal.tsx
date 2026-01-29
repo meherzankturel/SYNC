@@ -36,7 +36,7 @@ Audio.setAudioModeAsync({
 });
 
 // Beautiful VideoPlayer component with audio
-function VideoPlayer({ uri, isActive }: { uri: string; isActive: boolean }) {
+function VideoPlayer({ uri, isActive, shouldLoad = false }: { uri: string; isActive: boolean; shouldLoad?: boolean }) {
   const videoRef = useRef<Video>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -482,7 +482,7 @@ export default function MediaPreviewModal({
       }
 
       const fileName = `sync_${Date.now()}.${extension}`;
-      const filePath = `${FileSystem.cacheDirectory}${fileName}`;
+      const filePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
       console.log('📥 Downloading media to:', filePath);
       console.log('📥 From URL:', currentMedia.uri.substring(0, 100));
@@ -547,7 +547,7 @@ export default function MediaPreviewModal({
       const isVideo = currentMedia.type === 'video';
       const extension = isVideo ? 'mp4' : 'jpg';
       const fileName = `sync_share_${Date.now()}.${extension}`;
-      const filePath = `${FileSystem.cacheDirectory}${fileName}`;
+      const filePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
       console.log('📤 Downloading for share:', currentMedia.uri.substring(0, 100));
 
@@ -608,7 +608,11 @@ export default function MediaPreviewModal({
     if (item.type === 'video') {
       return (
         <View style={styles.mediaSlide}>
-          <VideoPlayer uri={item.uri} isActive={isActive} />
+          <VideoPlayer
+            uri={item.uri}
+            isActive={isActive}
+            shouldLoad={Math.abs(index - currentIndex) <= 1}
+          />
         </View>
       );
     }

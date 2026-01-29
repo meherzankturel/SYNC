@@ -1,5 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Modal, Pressable, ScrollView, SafeAreaView, RefreshControl, AppState, Animated, Easing, Image, ActionSheetIOS, TextInput, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Modal, Pressable, ScrollView, RefreshControl, AppState, Animated, Easing, Image, ActionSheetIOS, TextInput, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { NoPartnerState } from '../../src/components/doodle/NoPartnerState';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { signOut } from 'firebase/auth';
@@ -21,6 +23,7 @@ import { FeaturedMemory } from '../../src/components/doodle/home/FeaturedMemory'
 import { ControlCenter } from '../../src/components/doodle/home/ControlCenter';
 import { DailyEchoDoodle } from '../../src/components/doodle/home/DailyEchoDoodle';
 import { PhotoViewerModal } from '../../src/components/PhotoViewerModal';
+import { SyncLogoHeader } from '../../src/components/SyncLogoHeader';
 import * as Haptics from 'expo-haptics';
 import * as Notifications from 'expo-notifications';
 import * as Linking from 'expo-linking';
@@ -338,15 +341,6 @@ export default function HomeScreen() {
                     console.log('✅ Got my weather by coords:', weather.temp, weather.condition);
                 }
 
-                // Check for severe weather and notify partner
-                if (weather?.isSevere && partnerData?.pushToken && userData?.name) {
-                    await WeatherService.notifyPartnerOfSevereWeather(
-                        partnerData.pushToken,
-                        userData.city || 'their city',
-                        weather,
-                        userData.name
-                    );
-                }
                 setLoadingWeather(false);
             } else if (userData?.city) {
                 // Fallback to city name if no coords
@@ -1320,16 +1314,36 @@ export default function HomeScreen() {
     }, [user?.uid, userData?.partnerId]);
 
     const handleLogout = async () => {
-        // Set presence to offline before logging out
-        if (user && userData?.pairId) {
-            try {
-                await PresenceService.setOffline(user.uid, userData.pairId);
-                console.log('✅ Presence set to offline on logout');
-            } catch (err) {
-                console.warn('Failed to set presence offline on logout:', err);
-            }
-        }
-        await signOut(auth);
+        Alert.alert(
+            'Logout',
+            'Are you sure you want to log out?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Logout',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                            // Set presence to offline before logging out
+                            if (user && userData?.pairId) {
+                                try {
+                                    await PresenceService.setOffline(user.uid, userData.pairId);
+                                    console.log('✅ Presence set to offline on logout');
+                                } catch (err) {
+                                    console.warn('Failed to set presence offline on logout:', err);
+                                }
+                            }
+                            await signOut(auth);
+                            router.replace('/(auth)/login');
+                        } catch (error: any) {
+                            console.error('Logout error:', error);
+                            Alert.alert('Error', 'Failed to log out. Please try again.');
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     const handleMoodSelect = async (mood: MoodType, note?: string, cause?: any, customEmoji?: string) => {
@@ -1661,7 +1675,11 @@ export default function HomeScreen() {
     reunionDate.setDate(reunionDate.getDate() + 12);
 
     return (
-        <SwipeableTabWrapper tabIndex={0} totalTabs={4}>
+        <SwipeableTabWrapper
+            tabIndex={0}
+            totalTabs={4}
+            enabled={!photoViewerVisible && !showCaptionInput && !showEchoAnswerModal && !showEchoRevealModal}
+        >
             <View style={styles.container}>
                 <SafeAreaView style={{ flex: 1 }}>
                     {/* Heart Effects Overlay */}
@@ -1679,63 +1697,59 @@ export default function HomeScreen() {
                             />
                         }
                     >
-                        {userData?.partnerId ? (
-                            <View style={{ padding: 16 }}>
-                                <HomeHeaderDoodle
-                                    userImage={userData?.photoUrl}
-                                    partnerImage={partnerData?.photoUrl}
-                                    onSettingsPress={() => router.push('/settings')}
-                                    onProfilePress={() => router.push('/profile')}
-                                />
+                        {
+                            userData?.partnerId ? (
+                                <View style={{ padding: 16 }} >
+                                    <SyncLogoHeader
+                                        onSettingsPress={() => router.push('/settings')}
+                                        onLogoutPress={handleLogout}
+                                        userProfileImage={userData?.profileImage}
+                                    />
 
-                                <FeaturedMemory
-                                    imageUri={
-                                        MomentService.getPartnerPhoto(todayMoment, user?.uid || '')?.photoUrl ||
-                                        MomentService.getUserPhoto(todayMoment, user?.uid || '')?.photoUrl
-                                    }
-                                    onPress={handleAddMoment}
-                                    label="FEATURED MEMORY"
-                                />
+                                    <FeaturedMemory
+                                        imageUri={
+                                            MomentService.getPartnerPhoto(todayMoment, user?.uid || '')?.photoUrl ||
+                                            MomentService.getUserPhoto(todayMoment, user?.uid || '')?.photoUrl
+                                        }
+                                        onPress={handleAddMoment}
+                                        label="FEATURED MEMORY"
+                                    />
 
-                                <ControlCenter
-                                    onSendLove={() => handleSignal('pulse')}
-                                    onSOS={() => handleSignal('sos')}
-                                    sendingSOS={sendingSOS}
-                                />
+                                    <ControlCenter
+                                        onSendLove={() => handleSignal('pulse')}
+                                        onSOS={() => handleSignal('sos')}
+                                        sendingSOS={sendingSOS}
+                                    />
 
-                                <DailyEchoDoodle
-                                    question={dailyEcho?.question || "Loading..."}
-                                    hasAnswered={dailyEcho ? DailyEchoService.hasUserAnswered(dailyEcho, user?.uid || '') : false}
-                                    onAnswer={() => setShowEchoAnswerModal(true)}
-                                    canReveal={dailyEcho ? DailyEchoService.canReveal(dailyEcho) && DailyEchoService.haveBothAnswered(dailyEcho) : false}
-                                    onReveal={handleRevealEcho}
-                                    countdown={DailyEchoService.formatCountdown(echoCountdown)}
-                                    waitingForPartner={dailyEcho ? !DailyEchoService.haveBothAnswered(dailyEcho) && DailyEchoService.hasUserAnswered(dailyEcho, user?.uid || '') : false}
-                                />
+                                    <DailyEchoDoodle
+                                        question={dailyEcho?.question || "Loading..."}
+                                        hasAnswered={dailyEcho ? DailyEchoService.hasUserAnswered(dailyEcho, user?.uid || '') : false}
+                                        onAnswer={() => setShowEchoAnswerModal(true)}
+                                        canReveal={dailyEcho ? DailyEchoService.canReveal(dailyEcho) && DailyEchoService.haveBothAnswered(dailyEcho) : false}
+                                        onReveal={handleRevealEcho}
+                                        countdown={DailyEchoService.formatCountdown(echoCountdown)}
+                                        waitingForPartner={dailyEcho ? !DailyEchoService.haveBothAnswered(dailyEcho) && DailyEchoService.hasUserAnswered(dailyEcho, user?.uid || '') : false}
+                                    />
 
-                                <Text style={{ textAlign: 'center', marginTop: 40, color: '#000', letterSpacing: 4, fontSize: 10 }}>IN SYNC</Text>
-                            </View>
-                        ) : (
-                            <View style={styles.unlinkedContainer}>
-                                <View style={styles.unlinkedCard}>
-                                    <Text style={styles.unlinkedEmoji}>💕</Text>
-                                    <Text style={styles.unlinkedTitle}>Echoes of Us</Text>
-                                    <Text style={styles.unlinkedText}>
-                                        Connect with your partner to share moods, memories, and stay close no matter the distance.
-                                    </Text>
-                                    <TouchableOpacity
-                                        style={styles.connectButton}
-                                        onPress={() => router.push('/invite')}
-                                    >
-                                        <Text style={styles.connectButtonText}>Connect Partner</Text>
-                                    </TouchableOpacity>
+                                    <Text style={{ textAlign: 'center', marginTop: 40, color: '#000', letterSpacing: 4, fontSize: 10 }}>IN SYNC</Text>
+                                </View >
+                            ) : (
+                                <View style={{ flex: 1 }}>
+                                    <SyncLogoHeader
+                                        onSettingsPress={() => router.push('/settings')}
+                                        onLogoutPress={handleLogout}
+                                        userProfileImage={userData?.profileImage}
+                                    />
+                                    <NoPartnerState
+                                        title="Echoes of Us"
+                                        subtitle="Connect with your partner to share moods, memories, and stay close no matter the distance."
+                                    />
                                 </View>
-                            </View>
-                        )}
-                    </ScrollView>
+                            )}
+                    </ScrollView >
 
                     {/* PHOTO VIEWER MODAL */}
-                    <PhotoViewerModal
+                    < PhotoViewerModal
                         visible={photoViewerVisible}
                         photoUrl={selectedPhotoUrl}
                         caption={selectedPhotoCaption}
@@ -1880,9 +1894,9 @@ export default function HomeScreen() {
                             </Pressable>
                         </Pressable>
                     </Modal>
-                </SafeAreaView>
-            </View>
-        </SwipeableTabWrapper>
+                </SafeAreaView >
+            </View >
+        </SwipeableTabWrapper >
     );
 }
 
@@ -2025,5 +2039,107 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: theme.typography.fontSize.md,
         fontWeight: '600',
+    },
+
+    // Modals & Overlays
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: theme.spacing.md,
+    },
+    captionModal: {
+        width: '100%',
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.borderRadius['2xl'],
+        padding: theme.spacing.lg,
+        ...theme.shadows.lg,
+    },
+    captionModalTitle: {
+        fontSize: theme.typography.fontSize.xl,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+        marginBottom: theme.spacing.md,
+    },
+    dailyEchoQuestion: {
+        fontSize: theme.typography.fontSize.lg,
+        color: theme.colors.text,
+        fontFamily: theme.typography.fontFamily.rounded,
+        lineHeight: 24,
+    },
+    revealModal: {
+        width: '100%',
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.borderRadius['2xl'],
+        padding: theme.spacing.lg,
+        ...theme.shadows.lg,
+    },
+    revealHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: theme.spacing.sm,
+        marginBottom: theme.spacing.md,
+    },
+    revealModalTitle: {
+        fontSize: theme.typography.fontSize.xl,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+    },
+    revealQuestion: {
+        fontSize: theme.typography.fontSize.md,
+        color: theme.colors.textSecondary,
+        fontStyle: 'italic',
+        marginBottom: theme.spacing.lg,
+    },
+    answerSection: {
+        backgroundColor: theme.colors.backgroundAlt,
+        borderRadius: theme.borderRadius.xl,
+        padding: theme.spacing.md,
+        marginBottom: theme.spacing.md,
+    },
+    answerHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: theme.spacing.sm,
+        marginBottom: theme.spacing.xs,
+    },
+    answerAvatar: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: theme.colors.primaryLight,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    answerAvatarPartner: {
+        backgroundColor: theme.colors.secondaryLight,
+    },
+    answerAvatarText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    answerName: {
+        fontSize: theme.typography.fontSize.sm,
+        fontWeight: '600',
+        color: theme.colors.text,
+    },
+    answerText: {
+        fontSize: theme.typography.fontSize.base,
+        color: theme.colors.text,
+        lineHeight: 20,
+    },
+    closeRevealButton: {
+        backgroundColor: theme.colors.divider,
+        borderRadius: theme.borderRadius.xl,
+        paddingVertical: theme.spacing.md,
+        alignItems: 'center',
+        marginTop: theme.spacing.sm,
+    },
+    closeRevealButtonText: {
+        color: theme.colors.text,
+        fontWeight: '600',
+        fontSize: theme.typography.fontSize.md,
     },
 });

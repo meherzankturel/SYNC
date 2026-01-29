@@ -10,62 +10,66 @@ export const DoodleTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
         <View style={styles.container}>
             <BlurView intensity={80} tint="light" style={styles.blurContainer}>
                 <View style={styles.tabContainer}>
-                    {state.routes.map((route, index) => {
-                        const { options } = descriptors[route.key];
-                        const isFocused = state.index === index;
+                    {state.routes
+                        .filter(route => ['index', 'moods', 'date-nights', 'games'].includes(route.name))
+                        .map((route, index) => {
+                            // Find the original index in the state.routes array to check focus correctly
+                            const originalIndex = state.routes.findIndex(r => r.key === route.key);
+                            const { options } = descriptors[route.key];
+                            const isFocused = state.index === originalIndex;
 
-                        // Access the tab bar icon function from options
-                        // We'll call it with our custom styling props
-                        const IconComponent = options.tabBarIcon;
+                            // Access the tab bar icon function from options
+                            // We'll call it with our custom styling props
+                            const IconComponent = options.tabBarIcon;
 
-                        const onPress = () => {
-                            const event = navigation.emit({
-                                type: 'tabPress',
-                                target: route.key,
-                                canPreventDefault: true,
-                            });
+                            const onPress = () => {
+                                const event = navigation.emit({
+                                    type: 'tabPress',
+                                    target: route.key,
+                                    canPreventDefault: true,
+                                });
 
-                            if (!isFocused && !event.defaultPrevented) {
-                                navigation.navigate(route.name);
-                            }
-                        };
+                                if (!isFocused && !event.defaultPrevented) {
+                                    navigation.navigate(route.name);
+                                }
+                            };
 
-                        const onLongPress = () => {
-                            navigation.emit({
-                                type: 'tabLongPress',
-                                target: route.key,
-                            });
-                        };
+                            const onLongPress = () => {
+                                navigation.emit({
+                                    type: 'tabLongPress',
+                                    target: route.key,
+                                });
+                            };
 
-                        return (
-                            <TouchableOpacity
-                                key={route.key}
-                                accessibilityRole="button"
-                                accessibilityState={isFocused ? { selected: true } : {}}
-                                accessibilityLabel={options.tabBarAccessibilityLabel}
-                                testID={options.tabBarTestID}
-                                onPress={onPress}
-                                onLongPress={onLongPress}
-                                style={styles.tabButton}
-                            >
-                                {isFocused ? (
-                                    <View style={styles.activeTabBackground}>
+                            return (
+                                <TouchableOpacity
+                                    key={route.key}
+                                    accessibilityRole="button"
+                                    accessibilityState={isFocused ? { selected: true } : {}}
+                                    accessibilityLabel={options.tabBarAccessibilityLabel}
+                                    testID={options.tabBarTestID}
+                                    onPress={onPress}
+                                    onLongPress={onLongPress}
+                                    style={styles.tabButton}
+                                >
+                                    {isFocused ? (
+                                        <View style={styles.activeTabBackground}>
+                                            <Ionicons
+                                                name={getIconName(route.name, true) as any}
+                                                size={24}
+                                                color="#FFFFFF"
+                                            />
+                                        </View>
+                                    ) : (
                                         <Ionicons
-                                            name={getIconName(route.name, true) as any}
-                                            size={24}
-                                            color="#FFFFFF"
+                                            name={getIconName(route.name, false) as any}
+                                            size={28}
+                                            color={theme.colors.textSecondary}
                                         />
-                                    </View>
-                                ) : (
-                                    <Ionicons
-                                        name={getIconName(route.name, false) as any}
-                                        size={28}
-                                        color={theme.colors.textSecondary}
-                                    />
-                                )}
-                            </TouchableOpacity>
-                        );
-                    })}
+                                    )}
+                                </TouchableOpacity>
+                            );
+                        })}
                 </View>
             </BlurView>
         </View>

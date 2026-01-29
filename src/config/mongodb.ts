@@ -2,12 +2,8 @@
  * MONGODB ATLAS API CONFIGURATION
  * 
  * This file exports MongoDB Atlas API service configuration.
- * 
- * To configure:
- * 1. Get your MongoDB Atlas API endpoint from your backend
- * 2. Update the API_BASE_URL below
- * 3. Ensure your backend handles authentication and CORS
  */
+import { auth } from './firebase';
 
 /**
  * MongoDB Atlas API Configuration
@@ -135,15 +131,43 @@ export async function apiRequest<T>(
 
   const url = `${MONGODB_API_BASE_URL}${endpoint}`;
 
-  // Get auth token from storage if available
-  // TODO: Implement token storage/retrieval
-  const token = ''; // Get from AsyncStorage or auth context
+  // Initial token attempt
+  let token = await auth.currentUser?.getIdToken();
+
+  // If no user yet, wait a moment for auth state to resolve
+  if (!auth.currentUser && !token) {
+    if (__DEV__) console.log(`⏳ Waiting for auth state for ${endpoint}...`);
+    let attempts = 0;
+    while (!auth.currentUser && attempts < 20) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+  }
+
+  // Try to get token again if we don't have it yet
+  if (auth.currentUser && !token) {
+    try {
+      token = await auth.currentUser.getIdToken();
+    } catch (e) {
+      if (__DEV__) console.error('❌ Error getting ID token:', e);
+    }
+  }
+
+  if (__DEV__ && !token) {
+    console.warn(`🔑 No auth token for ${endpoint} after waiting.`);
+  }
+
+  const isFormData = options.body instanceof FormData;
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(token && { Authorization: `Bearer ${token}` }),
     ...options.headers,
   };
+
+  if (__DEV__) {
+    console.log(`🌐 API Request: ${options.method || 'GET'} ${endpoint} [Auth: ${!!token}]`);
+  }
 
   try {
     const response = await fetch(url, {
@@ -217,9 +241,17 @@ export async function uploadMedia(
 
   console.log(`📦 FormData prepared with ${files.length} file(s)`);
 
-  // Get auth token from AsyncStorage if available
-  // TODO: Implement proper token retrieval from AsyncStorage
-  const token = ''; // Get from AsyncStorage or auth context
+  // Get auth token from Firebase with a more reliable method
+  let token = await auth.currentUser?.getIdToken();
+
+  if (!token) {
+    let attempts = 0;
+    while (!auth.currentUser && attempts < 20) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+    token = await auth.currentUser?.getIdToken();
+  }
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();

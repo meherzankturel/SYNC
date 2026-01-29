@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../../../config/theme';
 
 interface ReviewDateDoodleProps {
@@ -26,17 +27,19 @@ export const ReviewDateDoodle: React.FC<ReviewDateDoodleProps> = ({
     onSubmit,
     onBack
 }) => {
+    const insets = useSafeAreaInsets();
+    const handwritingFont = Platform.OS === 'ios' ? 'Noteworthy-Bold' : 'sans-serif-medium';
+
     return (
         <View style={styles.container}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) }]}>
                 <TouchableOpacity onPress={onBack}>
                     <Ionicons name="arrow-back" size={24} color="#000" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>moment from last night</Text>
-                <TouchableOpacity onPress={onSubmit}>
-                    {/* Ellipsis/Menu in ref, but using as 'Save' here? Or header is just title */}
-                    <Ionicons name="ellipsis-horizontal" size={24} color="#000" />
+                <TouchableOpacity onPress={onSubmit} style={styles.submitButton}>
+                    <Text style={[styles.submitText, { fontFamily: handwritingFont }]}>Done</Text>
                 </TouchableOpacity>
             </View>
 
@@ -107,8 +110,18 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingTop: 20,
-        marginBottom: 20,
+        marginBottom: 10,
+    },
+    submitButton: {
+        paddingVertical: 4,
+        paddingHorizontal: 12,
+        backgroundColor: '#FFE5E5',
+        borderRadius: 12,
+    },
+    submitText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#E85D75',
     },
     headerTitle: {
         fontSize: 16,

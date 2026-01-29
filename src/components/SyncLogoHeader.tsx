@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../config/theme';
 
 interface SyncLogoHeaderProps {
     onSettingsPress?: () => void;
     onLogoutPress?: () => void;
     onMapPress?: () => void;
     showButtons?: boolean;
+    userProfileImage?: string | null;
 }
 
 export const SyncLogoHeader: React.FC<SyncLogoHeaderProps> = ({
@@ -14,21 +16,15 @@ export const SyncLogoHeader: React.FC<SyncLogoHeaderProps> = ({
     onLogoutPress,
     onMapPress,
     showButtons = true,
+    userProfileImage,
 }) => {
     return (
         <View style={styles.header}>
-            {/* SYNC Logo and Text */}
+            {/* SYNC Logo */}
             <View style={styles.logoContainer}>
-                {/* User's exact logo image - mini version */}
                 <Image
-                    source={require('../../assets/sync-logo.png')}
-                    style={styles.logoMini}
-                    resizeMode="contain"
-                />
-                {/* User's exact SYNC text image */}
-                <Image
-                    source={require('../../assets/sync-text.png')}
-                    style={styles.logoText}
+                    source={require('../../assets/sync_logo_v2.png')}
+                    style={styles.logoImage}
                     resizeMode="contain"
                 />
             </View>
@@ -41,23 +37,38 @@ export const SyncLogoHeader: React.FC<SyncLogoHeaderProps> = ({
                             style={styles.headerButton}
                             onPress={onMapPress}
                         >
-                            <Ionicons name="map-outline" size={22} color="#756189" />
+                            <Ionicons name="map-outline" size={24} color={theme.colors.text} />
                         </TouchableOpacity>
                     )}
                     {onSettingsPress && (
-                        <TouchableOpacity
-                            style={styles.headerButton}
-                            onPress={onSettingsPress}
-                        >
-                            <Ionicons name="settings-outline" size={22} color="#756189" />
-                        </TouchableOpacity>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            <TouchableOpacity
+                                style={styles.headerButton}
+                                onPress={onSettingsPress}
+                            >
+                                {userProfileImage ? (
+                                    <Image
+                                        source={{ uri: userProfileImage }}
+                                        style={styles.profileIcon}
+                                    />
+                                ) : (
+                                    <Ionicons name="person-circle-outline" size={26} color={theme.colors.text} />
+                                )}
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.headerButton}
+                                onPress={onSettingsPress}
+                            >
+                                <Ionicons name="settings-outline" size={24} color={theme.colors.text} />
+                            </TouchableOpacity>
+                        </View>
                     )}
                     {onLogoutPress && (
                         <TouchableOpacity
                             style={styles.headerButton}
                             onPress={onLogoutPress}
                         >
-                            <Ionicons name="log-out-outline" size={22} color="#756189" />
+                            <Ionicons name="log-out-outline" size={24} color={theme.colors.text} />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -72,36 +83,34 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 12,
-        paddingHorizontal: 4,
+        paddingHorizontal: 16,
+        backgroundColor: 'transparent',
     },
     logoContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
     },
-    logoMini: {
-        width: 40,
+    logoImage: {
+        width: 100,
         height: 40,
-    },
-    logoText: {
-        width: 70,
-        height: 20,
     },
     headerButtons: {
         flexDirection: 'row',
-        gap: 8,
+        gap: 4,
     },
     headerButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 12,
-        backgroundColor: '#f8f5ff',
+        width: 44,
+        height: 44,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    profileIcon: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
         borderWidth: 1,
-        borderColor: '#e8e0f0',
+        borderColor: theme.colors.divider,
     },
 });
 
 export default SyncLogoHeader;
-

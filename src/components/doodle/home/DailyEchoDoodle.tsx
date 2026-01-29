@@ -25,7 +25,7 @@ export const DailyEchoDoodle: React.FC<DailyEchoDoodleProps> = ({
 }) => {
     return (
         <View style={styles.container}>
-            <View style={styles.line} /> {/* Separation line */}
+            <View style={styles.line} />
 
             <WobblyCard
                 style={styles.card}

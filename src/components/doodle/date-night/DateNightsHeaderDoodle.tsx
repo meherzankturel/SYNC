@@ -13,7 +13,7 @@ export const DateNightsHeaderDoodle: React.FC<DateNightsHeaderDoodleProps> = ({ 
     return (
         <View style={styles.header}>
             <View>
-                <Text style={[styles.title, { fontFamily: handwritingFont }]}>Doodle Date Nights</Text>
+                <Text style={[styles.title, { fontFamily: handwritingFont }]}>Date Nights</Text>
                 <Text style={styles.subtitle}>Plan your next adventure</Text>
             </View>
 

@@ -2,6 +2,10 @@ import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle, Text, TouchableOpacity } from 'react-native';
 import { theme } from '../../config/theme';
 
+export * from './HeartDoodle';
+export * from './SparklesDoodle';
+export * from './NoPartnerState';
+
 interface WobblyProps {
     children?: React.ReactNode;
     style?: StyleProp<ViewStyle>;

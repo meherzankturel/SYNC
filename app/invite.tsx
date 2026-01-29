@@ -12,8 +12,9 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     ScrollView,
-    SafeAreaView
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ResponsiveUtils } from '../src/utils/responsive';
 import { db } from '../src/config/firebase';
 import {
     doc,
@@ -345,17 +346,17 @@ const styles = StyleSheet.create({
         transform: [{ rotate: '-3deg' }],
     },
     title: {
-        fontSize: 28,
+        fontSize: ResponsiveUtils.fontScale(28),
         fontWeight: '600',
         color: colors.text,
-        marginBottom: 10,
+        marginBottom: ResponsiveUtils.verticalScale(10),
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: ResponsiveUtils.fontScale(16),
         color: colors.textSecondary,
         textAlign: 'center',
-        marginBottom: 40,
-        lineHeight: 22,
+        marginBottom: ResponsiveUtils.verticalScale(40),
+        lineHeight: ResponsiveUtils.verticalScale(22),
     },
     section: {
         width: '100%',

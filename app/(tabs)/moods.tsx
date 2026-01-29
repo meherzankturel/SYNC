@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, SafeAreaView, Animated, Platform, Image } from 'react-native';
-import { WobblySquare, WobblyCard, WobblyCircle } from '../../src/components/doodle';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Animated, Platform, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { WobblySquare, WobblyCard, WobblyCircle, NoPartnerState } from '../../src/components/doodle';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { doc, onSnapshot, getDoc, collection, query, where, orderBy, limit } from 'firebase/firestore';
@@ -766,12 +767,12 @@ export default function MoodsScreen() {
   // Show content if partnerId exists - partner connection is determined by partnerId
   if (!userData?.partnerId) {
     return (
-      <View style={styles.container}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No partner connected</Text>
-          <Text style={styles.emptyText}>Connect with your partner to start sharing moods</Text>
-        </View>
-      </View>
+      <SwipeableTabWrapper tabIndex={1} totalTabs={4} enabled={true}>
+        <NoPartnerState
+          title="Moods"
+          subtitle="Connect with your partner to start sharing moods and staying in sync."
+        />
+      </SwipeableTabWrapper>
     );
   }
 
@@ -779,184 +780,185 @@ export default function MoodsScreen() {
   const partnerName = partnerData?.name || partnerData?.displayName || partnerData?.email?.split('@')[0] || 'Partner';
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerContainer}>
-        <View style={styles.headerAvatarColumn}>
-          <WobblySquare
-            rotate="2deg"
-            style={styles.avatarContainer}
-            borderColor={todayMood ? moodColors[todayMood.mood] : theme.colors.doodlePurple}
-          >
-            {userData?.profileImage ? (
-              <View style={{ width: '100%', height: '100%' }}>
-                <Image source={{ uri: userData.profileImage }} style={styles.avatarImage} />
-                {todayMood && (
-                  <View style={styles.emojiBadge}>
-                    <Text style={{ fontSize: 14 }}>{moodEmojis[todayMood.mood]}</Text>
-                  </View>
-                )}
-              </View>
-            ) : (
-              <View style={[styles.avatarImage, {
-                backgroundColor: todayMood ? moodColors[todayMood.mood] + '20' : '#f0f0f0',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }]}>
-                <Text style={{ fontSize: 32 }}>{todayMood ? moodEmojis[todayMood.mood] : ''}</Text>
-              </View>
-            )}
-          </WobblySquare>
-          <Text style={[styles.avatarLabel, { color: todayMood ? moodColors[todayMood.mood] : theme.colors.doodlePurple }]}>Me</Text>
-        </View>
+    <SwipeableTabWrapper tabIndex={1} totalTabs={4} enabled={!showMoodModal}>
+      <SafeAreaView style={styles.container} edges={['top']}>
+        {/* Header */}
+        <View style={styles.headerContainer}>
+          <View style={styles.headerAvatarColumn}>
+            <WobblySquare
+              rotate="2deg"
+              style={styles.avatarContainer}
+              borderColor={todayMood ? moodColors[todayMood.mood] : theme.colors.doodlePurple}
+            >
+              {userData?.profileImage ? (
+                <View style={{ width: '100%', height: '100%' }}>
+                  <Image source={{ uri: userData.profileImage }} style={styles.avatarImage} />
+                  {todayMood && (
+                    <View style={styles.emojiBadge}>
+                      <Text style={{ fontSize: 14 }}>{moodEmojis[todayMood.mood]}</Text>
+                    </View>
+                  )}
+                </View>
+              ) : (
+                <View style={[styles.avatarImage, {
+                  backgroundColor: todayMood ? moodColors[todayMood.mood] + '20' : '#f0f0f0',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }]}>
+                  <Text style={{ fontSize: 32 }}>{todayMood ? moodEmojis[todayMood.mood] : ''}</Text>
+                </View>
+              )}
+            </WobblySquare>
+            <Text style={[styles.avatarLabel, { color: todayMood ? moodColors[todayMood.mood] : theme.colors.doodlePurple }]}>Me</Text>
+          </View>
 
-        <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Mood Hub</Text>
-        </View>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>Mood Hub</Text>
+          </View>
 
-        <View style={styles.headerAvatarColumn}>
-          <WobblySquare
-            rotate="-2deg"
-            style={styles.avatarContainer}
-            borderColor={partnerTodayMood ? moodColors[partnerTodayMood.mood] : theme.colors.doodlePink}
-          >
-            {partnerData?.profileImage ? (
-              <View style={{ width: '100%', height: '100%' }}>
-                <Image source={{ uri: partnerData.profileImage }} style={styles.avatarImage} />
-                {partnerTodayMood && (
-                  <View style={styles.emojiBadge}>
-                    <Text style={{ fontSize: 14 }}>{moodEmojis[partnerTodayMood.mood]}</Text>
-                  </View>
-                )}
-              </View>
-            ) : (
-              <View style={[styles.avatarImage, {
-                backgroundColor: partnerTodayMood ? moodColors[partnerTodayMood.mood] + '20' : '#f0f0f0',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }]}>
-                <Text style={{ fontSize: 32 }}>{partnerTodayMood ? moodEmojis[partnerTodayMood.mood] : ''}</Text>
-              </View>
-            )}
-          </WobblySquare>
-          <Text style={[styles.avatarLabel, { color: partnerTodayMood ? moodColors[partnerTodayMood.mood] : theme.colors.doodlePink }]}>{partnerName}</Text>
-        </View>
-      </View>
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={theme.colors.primary}
-          />
-        }
-      >
-        {/* How are you now section - Moved to Top */}
-        <View style={styles.promptSection}>
-          <Text style={styles.promptTitle}>How are you now?</Text>
-
-          <View style={styles.moodGrid}>
-            {ALL_MOODS.map((m) => {
-              const moodType = m;
-              const emoji = moodEmojis[moodType];
-              const label = moodLabels[moodType];
-              const isActive = todayMood?.mood === moodType;
-
-              return (
-                <TouchableOpacity
-                  key={m}
-                  style={styles.moodBtn}
-                  onPress={() => handleMoodSubmit(moodType)}
-                >
-                  <WobblyCircle
-                    style={[
-                      styles.moodBtnCircle,
-                      isActive && { backgroundColor: moodColors[moodType] + '20' }
-                    ]}
-                    borderColor={isActive ? moodColors[moodType] : theme.colors.text + '20'}
-                  >
-                    <Text style={{ fontSize: 24 }}>{emoji}</Text>
-                  </WobblyCircle>
-                  <Text style={[
-                    styles.moodBtnLabel,
-                    isActive && { opacity: 1, color: moodColors[moodType] }
-                  ]}>{label}</Text>
-                </TouchableOpacity>
-              );
-            })}
+          <View style={styles.headerAvatarColumn}>
+            <WobblySquare
+              rotate="-2deg"
+              style={styles.avatarContainer}
+              borderColor={partnerTodayMood ? moodColors[partnerTodayMood.mood] : theme.colors.doodlePink}
+            >
+              {partnerData?.profileImage ? (
+                <View style={{ width: '100%', height: '100%' }}>
+                  <Image source={{ uri: partnerData.profileImage }} style={styles.avatarImage} />
+                  {partnerTodayMood && (
+                    <View style={styles.emojiBadge}>
+                      <Text style={{ fontSize: 14 }}>{moodEmojis[partnerTodayMood.mood]}</Text>
+                    </View>
+                  )}
+                </View>
+              ) : (
+                <View style={[styles.avatarImage, {
+                  backgroundColor: partnerTodayMood ? moodColors[partnerTodayMood.mood] + '20' : '#f0f0f0',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }]}>
+                  <Text style={{ fontSize: 32 }}>{partnerTodayMood ? moodEmojis[partnerTodayMood.mood] : ''}</Text>
+                </View>
+              )}
+            </WobblySquare>
+            <Text style={[styles.avatarLabel, { color: partnerTodayMood ? moodColors[partnerTodayMood.mood] : theme.colors.doodlePink }]}>{partnerName}</Text>
           </View>
         </View>
 
-        {/* History Toggle */}
-        <TouchableOpacity
-          style={styles.historyButton}
-          onPress={() => setShowHistory(!showHistory)}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={theme.colors.primary}
+            />
+          }
         >
-          <Text style={styles.historyButtonText}>{showHistory ? 'Hide Past Moods' : 'See Past Moods'}</Text>
-          <Ionicons name={showHistory ? 'chevron-up' : 'chevron-down'} size={16} color={theme.colors.textSecondary} />
-        </TouchableOpacity>
+          {/* How are you now section - Moved to Top */}
+          <View style={styles.promptSection}>
+            <Text style={styles.promptTitle}>How are you now?</Text>
 
-        {/* Mood Story Timeline - Conditionally Rendered */}
-        {showHistory && (
-          <View style={styles.timelineSection}>
-            <Text style={styles.timelineTitle}>OUR MOOD STORY</Text>
-
-            <View style={styles.timelineContainer}>
-              <View style={styles.timelineLine} />
-
-              {moods.slice(0, 20).map((mood, index) => {
-                const isMe = mood.userId === user?.uid;
-                const moodColor = moodColors[mood.mood] || theme.colors.primary;
-                const emoji = mood.customEmoji || moodEmojis[mood.mood];
-                const timeAgo = formatTimeAgo(mood.createdAt);
+            <View style={styles.moodGrid}>
+              {ALL_MOODS.map((m) => {
+                const moodType = m;
+                const emoji = moodEmojis[moodType];
+                const label = moodLabels[moodType];
+                const isActive = todayMood?.mood === moodType;
 
                 return (
-                  <View key={mood.id || index} style={styles.timelineItem}>
-                    <View style={styles.timelineLeft}>
-                      {!isMe && (
-                        <>
-                          <Text style={{ fontSize: 24 }}>{emoji}</Text>
-                          <Text style={styles.timestamp}>{timeAgo}</Text>
-                        </>
-                      )}
-                    </View>
-
-                    <View style={[styles.timelineCenter, { backgroundColor: moodColor, borderColor: '#fff' }]} />
-
-                    <View style={styles.timelineRight}>
-                      {isMe && (
-                        <>
-                          <Text style={{ fontSize: 24 }}>{emoji}</Text>
-                          <Text style={styles.timestamp}>{timeAgo}</Text>
-                        </>
-                      )}
-                    </View>
-                  </View>
+                  <TouchableOpacity
+                    key={m}
+                    style={styles.moodBtn}
+                    onPress={() => handleMoodSubmit(moodType)}
+                  >
+                    <WobblyCircle
+                      style={[
+                        styles.moodBtnCircle,
+                        isActive && { backgroundColor: moodColors[moodType] + '20' }
+                      ]}
+                      borderColor={isActive ? moodColors[moodType] : theme.colors.text + '20'}
+                    >
+                      <Text style={{ fontSize: 24 }}>{emoji}</Text>
+                    </WobblyCircle>
+                    <Text style={[
+                      styles.moodBtnLabel,
+                      isActive && { opacity: 1, color: moodColors[moodType] }
+                    ]}>{label}</Text>
+                  </TouchableOpacity>
                 );
               })}
-              {moods.length === 0 && (
-                <Text style={styles.emptyText}>No recent moods</Text>
-              )}
             </View>
           </View>
-        )}
 
-      </ScrollView>
+          {/* History Toggle */}
+          <TouchableOpacity
+            style={styles.historyButton}
+            onPress={() => setShowHistory(!showHistory)}
+          >
+            <Text style={styles.historyButtonText}>{showHistory ? 'Hide Past Moods' : 'See Past Moods'}</Text>
+            <Ionicons name={showHistory ? 'chevron-up' : 'chevron-down'} size={16} color={theme.colors.textSecondary} />
+          </TouchableOpacity>
 
-      <MoodSelector
-        visible={showMoodModal}
-        onClose={() => setShowMoodModal(false)}
-        onSubmit={handleMoodSubmit}
-        loading={submittingMood}
-        partnerName={partnerName}
-      />
-    </SafeAreaView>
+          {/* Mood Story Timeline - Conditionally Rendered */}
+          {showHistory && (
+            <View style={styles.timelineSection}>
+              <Text style={styles.timelineTitle}>OUR MOOD STORY</Text>
+
+              <View style={styles.timelineContainer}>
+                <View style={styles.timelineLine} />
+
+                {moods.slice(0, 20).map((mood, index) => {
+                  const isMe = mood.userId === user?.uid;
+                  const moodColor = moodColors[mood.mood] || theme.colors.primary;
+                  const emoji = mood.customEmoji || moodEmojis[mood.mood];
+                  const timeAgo = formatTimeAgo(mood.createdAt);
+
+                  return (
+                    <View key={mood.id || index} style={styles.timelineItem}>
+                      <View style={styles.timelineLeft}>
+                        {!isMe && (
+                          <>
+                            <Text style={{ fontSize: 24 }}>{emoji}</Text>
+                            <Text style={styles.timestamp}>{timeAgo}</Text>
+                          </>
+                        )}
+                      </View>
+
+                      <View style={[styles.timelineCenter, { backgroundColor: moodColor, borderColor: '#fff' }]} />
+
+                      <View style={styles.timelineRight}>
+                        {isMe && (
+                          <>
+                            <Text style={{ fontSize: 24 }}>{emoji}</Text>
+                            <Text style={styles.timestamp}>{timeAgo}</Text>
+                          </>
+                        )}
+                      </View>
+                    </View>
+                  );
+                })}
+                {moods.length === 0 && (
+                  <Text style={styles.emptyText}>No recent moods</Text>
+                )}
+              </View>
+            </View>
+          )}
+
+        </ScrollView>
+
+        <MoodSelector
+          visible={showMoodModal}
+          onClose={() => setShowMoodModal(false)}
+          onSubmit={handleMoodSubmit}
+          loading={submittingMood}
+          partnerName={partnerName}
+        />
+      </SafeAreaView>
+    </SwipeableTabWrapper>
   );
-
 }
 
 const styles = StyleSheet.create({

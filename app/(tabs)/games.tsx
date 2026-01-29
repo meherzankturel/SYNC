@@ -1,4 +1,6 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, SafeAreaView, Alert, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NoPartnerState } from '../../src/components/doodle';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useEffect, useState, useCallback } from 'react';
 import { doc, onSnapshot, collection, query, where, onSnapshot as onSnapshotQuery, orderBy, limit, getDocs } from 'firebase/firestore';
@@ -709,20 +711,21 @@ export default function GamesScreen() {
   // Show content if partnerId exists - partner connection is determined by partnerId
   if (!userData?.partnerId) {
     return (
-      <SwipeableTabWrapper tabIndex={3} totalTabs={4}>
-        <SafeAreaView style={styles.container} edges={['top']}>
-          <View style={styles.emptyContainer}>
-            <Ionicons name="game-controller-outline" size={64} color={theme.colors.textLight} />
-            <Text style={styles.emptyText}>No partner connected</Text>
-            <Text style={styles.emptySubtext}>Connect with your partner to play games</Text>
-          </View>
-        </SafeAreaView>
+      <SwipeableTabWrapper tabIndex={3} totalTabs={4} enabled={true}>
+        <NoPartnerState
+          title="Games"
+          subtitle="Connect with your partner to play games and grow closer together!"
+        />
       </SwipeableTabWrapper>
     );
   }
 
   return (
-    <SwipeableTabWrapper tabIndex={3} totalTabs={4}>
+    <SwipeableTabWrapper
+      tabIndex={3}
+      totalTabs={4}
+      enabled={!showQuestionGame && !showTriviaGame && !showWouldYouRatherGame && !showThisOrThatGame}
+    >
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
           <View>

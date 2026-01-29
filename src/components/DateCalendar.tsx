@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { theme } from '../config/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { DateNight } from '../services/dateNight.service';
@@ -13,6 +13,8 @@ interface DateCalendarProps {
 export default function DateCalendar({ dateNights, onDateSelect, selectedDate }: DateCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
+  const handwritingFont = Platform.OS === 'ios' ? 'Noteworthy-Bold' : 'sans-serif-medium';
+
   // Get days in current month
   const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
   const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
@@ -23,26 +25,26 @@ export default function DateCalendar({ dateNights, onDateSelect, selectedDate }:
   const datesWithEvents = useMemo(() => {
     const map = new Map<string, DateNight[]>();
     const now = new Date();
-    
+
     dateNights.forEach(night => {
       // Skip completed dates and dates without valid dates
       if (night.completed || !night.date) {
         return;
       }
-      
+
       try {
         const date = night.date?.toDate ? night.date.toDate() : new Date(night.date);
         if (isNaN(date.getTime())) return; // Skip invalid dates
-        
+
         // Only show upcoming dates (or today's dates) on the calendar
         // If date is in the past and not today, skip it
         const isToday = date.toDateString() === now.toDateString();
         const isFuture = date > now;
-        
+
         if (!isToday && !isFuture) {
           return; // Skip past dates (completed or not)
         }
-        
+
         // Use consistent date key format (year-month-day)
         const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
         if (!map.has(dateKey)) {
@@ -73,7 +75,7 @@ export default function DateCalendar({ dateNights, onDateSelect, selectedDate }:
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   const isDateToday = (day: number) => {
     const today = new Date();
@@ -83,11 +85,11 @@ export default function DateCalendar({ dateNights, onDateSelect, selectedDate }:
     const currentDay = day;
     const currentMonthIndex = currentMonth.getMonth();
     const currentYear = currentMonth.getFullYear();
-    
+
     const isToday = currentDay === todayDate &&
-                    currentMonthIndex === todayMonth &&
-                    currentYear === todayYear;
-    
+      currentMonthIndex === todayMonth &&
+      currentYear === todayYear;
+
     return isToday;
   };
 
@@ -107,16 +109,16 @@ export default function DateCalendar({ dateNights, onDateSelect, selectedDate }:
   const isDateUpcoming = (day: number) => {
     const today = new Date();
     const checkDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-    
+
     // Check if date is in the future
     const isFuture = checkDate > today;
-    
+
     // Check if it has an event
     const hasEvent = hasDateNight(day);
-    
+
     // Check if it's not today
     const isToday = isDateToday(day);
-    
+
     return isFuture && hasEvent && !isToday;
   };
 
@@ -129,31 +131,20 @@ export default function DateCalendar({ dateNights, onDateSelect, selectedDate }:
 
     // Priority: Today should ALWAYS be highlighted, even if selected or has event
     // Today's highlight takes highest priority - always visible
-    
+
     return (
       <TouchableOpacity
         key={index}
         style={[
           styles.dayCell,
-          // Today's highlight is always applied first - ALWAYS visible
           isToday && styles.todayCell,
-          // Event background only if not today
-          hasEvent && !isToday && !isUpcoming && !isSelected && styles.dayWithEvent,
-          // Upcoming highlight only if not today
-          isUpcoming && !isToday && !isSelected && styles.upcomingCell,
-          // Regular dates without events get a subtle background
-          !hasEvent && !isToday && !isUpcoming && !isSelected && styles.dayCellRegular,
-          // Selected style (but today's border remains visible)
+          isUpcoming && !isToday && styles.upcomingCell,
+          hasEvent && !isToday && !isUpcoming && styles.availableCell,
           isSelected && !isToday && styles.selectedDay,
-          // If today is selected, use special combined style
-          isToday && isSelected && styles.todaySelectedCell,
         ]}
         onPress={() => {
           if (dateNight && onDateSelect) {
             onDateSelect(dateNight);
-          } else if (isToday && !hasEvent) {
-            // Allow clicking today even if no event - could open "add event" modal
-            // For now, just allow it to be visible and clickable
           }
         }}
         disabled={!hasEvent && !isToday}
@@ -161,26 +152,20 @@ export default function DateCalendar({ dateNights, onDateSelect, selectedDate }:
       >
         <Text style={[
           styles.dayText,
-          // Today text style - always applied if today
-          isToday && !isSelected && styles.todayText,
-          // Upcoming text only if not today
-          isUpcoming && !isToday && !isSelected && styles.upcomingText,
-          // Selected text (white) only if not today
+          { fontFamily: handwritingFont },
+          isToday && styles.todayText,
+          isUpcoming && !isToday && styles.upcomingText,
           isSelected && !isToday && styles.selectedDayText,
-          // If today is selected, use selected text style (white) but keep today's background
-          isToday && isSelected && styles.todaySelectedText,
-          // Event text only if not today or selected
-          hasEvent && !isToday && !isUpcoming && !isSelected && styles.dayTextWithEvent,
+          hasEvent && !isToday && !isUpcoming && styles.availableText,
         ]}>
           {day}
         </Text>
         {hasEvent && (
           <View style={[
             styles.eventDot,
-            isToday && !isSelected && styles.eventDotToday,
-            isToday && isSelected && styles.eventDotTodaySelected,
-            isUpcoming && !isToday && !isSelected && styles.eventDotUpcoming,
-            isSelected && !isToday && styles.eventDotSelected,
+            isToday && styles.eventDotToday,
+            isUpcoming && styles.eventDotUpcoming,
+            isSelected && styles.eventDotSelected,
           ]} />
         )}
       </TouchableOpacity>
@@ -208,26 +193,10 @@ export default function DateCalendar({ dateNights, onDateSelect, selectedDate }:
         >
           <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
-        
+
         <View style={styles.monthContainer}>
-          <Text style={styles.monthText}>
+          <Text style={[styles.monthText, { fontFamily: handwritingFont }]}>
             {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-          </Text>
-          <Text style={styles.eventsCount}>
-            {dateNights.filter(night => {
-              if (night.completed || !night.date) return false;
-              try {
-                const date = night.date?.toDate ? night.date.toDate() : new Date(night.date);
-                const now = new Date();
-                const isToday = date.toDateString() === now.toDateString();
-                const isFuture = date > now;
-                return (isToday || isFuture) &&
-                       date.getMonth() === currentMonth.getMonth() &&
-                       date.getFullYear() === currentMonth.getFullYear();
-              } catch {
-                return false;
-              }
-            }).length} upcoming dates this month
           </Text>
         </View>
 
@@ -241,9 +210,9 @@ export default function DateCalendar({ dateNights, onDateSelect, selectedDate }:
 
       {/* Week Day Headers */}
       <View style={styles.weekHeader}>
-        {weekDays.map(day => (
-          <View key={day} style={styles.weekDay}>
-            <Text style={styles.weekDayText}>{day}</Text>
+        {weekDays.map((day, idx) => (
+          <View key={`${day}-${idx}`} style={styles.weekDay}>
+            <Text style={[styles.weekDayText, { fontFamily: handwritingFont }]}>{day}</Text>
           </View>
         ))}
       </View>
@@ -261,16 +230,16 @@ export default function DateCalendar({ dateNights, onDateSelect, selectedDate }:
       {/* Legend */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: theme.colors.secondary }]} />
-          <Text style={styles.legendText}>Upcoming dates</Text>
-        </View>
-        <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: theme.colors.primary }]} />
-          <Text style={styles.legendText}>Today</Text>
+          <Text style={[styles.legendText, { fontFamily: handwritingFont }]}>Today</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, styles.eventDot]} />
-          <Text style={styles.legendText}>Date booked</Text>
+          <View style={[styles.legendDot, { backgroundColor: theme.colors.secondary + '60' }]} />
+          <Text style={[styles.legendText, { fontFamily: handwritingFont }]}>Upcoming</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: theme.colors.primary + '40' }]} />
+          <Text style={[styles.legendText, { fontFamily: handwritingFont }]}>Available</Text>
         </View>
       </View>
     </View>
@@ -279,10 +248,16 @@ export default function DateCalendar({ dateNights, onDateSelect, selectedDate }:
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.lg,
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: '#000',
     padding: theme.spacing.md,
-    ...theme.shadows.md,
+    // Organic shape for Doodle UI
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 28,
   },
   header: {
     flexDirection: 'row',
@@ -298,28 +273,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   monthText: {
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
+    fontSize: 22,
+    fontWeight: 'bold',
     color: theme.colors.text,
-  },
-  eventsCount: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.text,
-    marginTop: 2,
-    fontWeight: theme.typography.fontWeight.medium,
   },
   weekHeader: {
     flexDirection: 'row',
     marginBottom: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    paddingBottom: 8,
   },
   weekDay: {
     flex: 1,
     alignItems: 'center',
   },
   weekDayText: {
-    fontSize: theme.typography.fontSize.xs,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text,
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
   },
   calendarGrid: {
     flexDirection: 'row',
@@ -332,127 +304,84 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    marginBottom: theme.spacing.xs,
-  },
-  dayCellRegular: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.borderRadius.sm,
+    marginVertical: 2,
   },
   dayText: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.text,
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  dayWithEvent: {
-    backgroundColor: theme.colors.primary + '25', // More vibrant primary background for booked dates
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.primary + '40',
-  },
-  dayTextWithEvent: {
-    color: theme.colors.primary,
-    fontWeight: theme.typography.fontWeight.semibold,
+    fontSize: 18,
+    color: '#333',
   },
   todayCell: {
-    backgroundColor: theme.colors.primary + '60', // More vibrant primary background for today
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 3, // Thicker border for better visibility
-    borderColor: theme.colors.primary,
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-    // Force today to always be visible
-    zIndex: 10,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 12,
+    transform: [{ rotate: '-2deg' }],
   },
   todayText: {
-    color: theme.colors.primary,
-    fontWeight: theme.typography.fontWeight.bold,
-    fontSize: theme.typography.fontSize.base + 2, // Larger for better visibility
-  },
-  todaySelectedCell: {
-    // When today is selected, use vibrant solid primary background
-    backgroundColor: theme.colors.primary, // Solid primary when selected
-    borderWidth: 3,
-    borderColor: theme.colors.primary,
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.4,
-    shadowRadius: 5,
-    elevation: 6,
-    zIndex: 10,
-  },
-  todaySelectedText: {
     color: '#fff',
-    fontWeight: theme.typography.fontWeight.bold,
-    fontSize: theme.typography.fontSize.base + 1,
-  },
-  eventDotTodaySelected: {
-    backgroundColor: '#fff',
+    fontWeight: 'bold',
   },
   upcomingCell: {
-    backgroundColor: theme.colors.secondary + '30', // More vibrant secondary color for upcoming dates
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 2,
+    backgroundColor: theme.colors.secondary + '20',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderStyle: 'dashed',
     borderColor: theme.colors.secondary,
-    shadowColor: theme.colors.secondary,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
-    elevation: 2,
   },
   upcomingText: {
     color: theme.colors.secondary,
-    fontWeight: theme.typography.fontWeight.bold,
+  },
+  availableCell: {
+    backgroundColor: theme.colors.primary + '15',
+    borderRadius: 12,
+  },
+  availableText: {
+    color: theme.colors.primary,
   },
   selectedDay: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.sm,
+    borderWidth: 2,
+    borderColor: '#000',
+    borderRadius: 12,
   },
   selectedDayText: {
-    color: '#fff',
-    fontWeight: theme.typography.fontWeight.bold,
+    fontWeight: 'bold',
   },
   eventDot: {
     position: 'absolute',
-    bottom: 4,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    bottom: 6,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
     backgroundColor: theme.colors.primary,
   },
   eventDotToday: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: '#fff',
   },
   eventDotUpcoming: {
     backgroundColor: theme.colors.secondary,
   },
   eventDotSelected: {
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
   },
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: theme.spacing.lg,
-    paddingTop: theme.spacing.sm,
+    paddingTop: theme.spacing.md,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
+    borderTopColor: '#eee',
+    gap: 16,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.xs,
   },
   legendDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 6,
   },
   legendText: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.text,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontSize: 13,
+    color: '#444',
   },
 });
 

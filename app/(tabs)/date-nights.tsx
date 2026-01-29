@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Modal, Pressable, Alert, Switch, RefreshControl, Keyboard, Image, AppState } from 'react-native';
-import { WobblyCard } from '../../src/components/doodle';
+import { WobblyCard, NoPartnerState } from '../../src/components/doodle';
 import { DoodleDateCard } from '../../src/components/doodle/DoodleDateCard';
 import { DateNightsHeaderDoodle } from '../../src/components/doodle/date-night/DateNightsHeaderDoodle';
 import { DoodleTabSwitcher } from '../../src/components/doodle/date-night/DoodleTabSwitcher';
@@ -1606,36 +1606,16 @@ export default function DateNightsScreen() {
   if (!hasPair) {
     return (
       <SwipeableTabWrapper tabIndex={2} totalTabs={4}>
-        <SafeAreaView style={styles.container} edges={['top']}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Date Nights</Text>
-          </View>
-          <View style={styles.emptyContainer}>
-            <Ionicons name="calendar-outline" size={64} color={theme.colors.textLight} />
-            <Text style={styles.emptyText}>No partner connected</Text>
-            <Text style={styles.emptySubtext}>Connect with your partner to plan date nights</Text>
-            <Button
-              title="Connect Partner"
-              onPress={() => router.push('/invite')}
-              variant="primary"
-              style={{ marginTop: theme.spacing.lg }}
-            />
-            <Text style={styles.debugText}>
-              {userData ? `User ID: ${user?.uid?.substring(0, 8)}...\npairId: ${userData.pairId || 'Will be auto-generated'}\npartnerId: ${userData.partnerId || 'none'}` : 'Loading user data...'}
-            </Text>
-            {userData && !userData.pairId && userData.partnerId && (
-              <Text style={[styles.debugText, { color: theme.colors.info, marginTop: theme.spacing.sm }]}>
-                ℹ️ Note: pairId will be automatically generated from your partnerId when you create your first date.
-              </Text>
-            )}
-          </View>
-        </SafeAreaView>
+        <NoPartnerState
+          title="Date Nights"
+          subtitle="Connect with your partner to plan your next romantic getaway or cozy night in."
+        />
       </SwipeableTabWrapper>
     );
   }
 
   return (
-    <SwipeableTabWrapper tabIndex={2} totalTabs={4}>
+    <SwipeableTabWrapper tabIndex={2} totalTabs={4} enabled={!previewVisible}>
       <SafeAreaView style={styles.container} edges={['top']}>
         <DateNightsHeaderDoodle onAddPress={openCreateModal} />
 
@@ -1643,7 +1623,7 @@ export default function DateNightsScreen() {
         <DoodleTabSwitcher
           tabs={[
             { id: 'upcoming', label: `Upcoming` },
-            { id: 'past', label: `Recently Past` },
+            { id: 'past', label: `Past` },
           ]}
           activeTab={activeDateTab}
           onTabChange={(tabId) => setActiveDateTab(tabId as 'upcoming' | 'past')}
@@ -1718,11 +1698,42 @@ export default function DateNightsScreen() {
                     </View>
                   )}
                 </>
+              )}              {/* Past Tab Content */}
+              {activeDateTab === 'past' && (
+                <View style={styles.section}>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Past</Text>
+                  </View>
+                  {sortedPastNights.length === 0 ? (
+                    <View style={styles.emptyContainer}>
+                      <Ionicons name="heart-outline" size={64} color={theme.colors.textLight} />
+                      <Text style={styles.emptyText}>No past moments yet</Text>
+                    </View>
+                  ) : (
+                    sortedPastNights.map((dateNight) => (
+                      <View key={dateNight.id} style={{ opacity: 1 }}>
+                        <DoodleDateCard
+                          title={dateNight.title}
+                          date={dateNight.date?.toDate ? dateNight.date.toDate() : new Date(dateNight.date)}
+                          categoryIcon={CATEGORIES.find(cat => cat.id === dateNight.category)?.icon || 'ellipse'}
+                          categoryColor={CATEGORIES.find(cat => cat.id === dateNight.category)?.color || theme.colors.textSecondary}
+                          description={dateNight.description}
+                          isUpcoming={false}
+                          userReview={userReviews[dateNight.id!]}
+                          partnerReview={reviews[dateNight.id!]?.find(r => r.userId !== user?.uid)}
+                          allMediaItems={[
+                            ...((reviews[dateNight.id!] || []).flatMap(r => r.images?.map(uri => ({ uri, type: 'image' as const })) || []) || []),
+                            ...((reviews[dateNight.id!] || []).flatMap(r => r.videos?.map(uri => ({ uri, type: 'video' as const })) || []) || []),
+                          ]}
+                          onMediaPress={openMediaPreview}
+                          onEdit={() => handleOpenReview(dateNight)}
+                          onDelete={() => handleDelete(dateNight)}
+                        />
+                      </View>
+                    ))
+                  )}
+                </View>
               )}
-
-
-
-
             </View>
           )}
 
@@ -1781,9 +1792,9 @@ export default function DateNightsScreen() {
 
               {/* Past Tab Content - Doodle Style */}
               {activeDateTab === 'past' && (
-                <View style={[styles.section, { opacity: 0.8 }]}>
+                <View style={styles.section}>
                   <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Recently Past</Text>
+                    <Text style={styles.sectionTitle}>Past</Text>
                   </View>
                   {sortedPastNights.length === 0 ? (
                     <View style={styles.emptyContainer}>
@@ -1792,7 +1803,7 @@ export default function DateNightsScreen() {
                     </View>
                   ) : (
                     sortedPastNights.map((dateNight) => (
-                      <View key={dateNight.id} style={{ opacity: 0.7 }}>
+                      <View key={dateNight.id} style={{ opacity: 1 }}>
                         <DoodleDateCard
                           title={dateNight.title}
                           date={dateNight.date?.toDate ? dateNight.date.toDate() : new Date(dateNight.date)}
@@ -1800,6 +1811,13 @@ export default function DateNightsScreen() {
                           categoryColor={CATEGORIES.find(cat => cat.id === dateNight.category)?.color || theme.colors.textSecondary}
                           description={dateNight.description}
                           isUpcoming={false}
+                          userReview={userReviews[dateNight.id!]}
+                          partnerReview={reviews[dateNight.id!]?.find(r => r.userId !== user?.uid)}
+                          allMediaItems={[
+                            ...((reviews[dateNight.id!] || []).flatMap(r => r.images?.map(uri => ({ uri, type: 'image' as const })) || []) || []),
+                            ...((reviews[dateNight.id!] || []).flatMap(r => r.videos?.map(uri => ({ uri, type: 'video' as const })) || []) || []),
+                          ]}
+                          onMediaPress={openMediaPreview}
                           onEdit={() => handleOpenReview(dateNight)}
                           onDelete={() => handleDelete(dateNight)}
                         />
@@ -1839,7 +1857,7 @@ export default function DateNightsScreen() {
               <PlanDateDoodle
                 title={title}
                 setTitle={setTitle}
-                selectedVibe={category}
+                selectedVibe={category || 'other'}
                 setVibe={(id) => setCategory(id as any)}
                 vibes={CATEGORIES.map(c => ({
                   id: c.id,
@@ -1879,8 +1897,6 @@ export default function DateNightsScreen() {
                     value={selectedTime}
                     onChange={(time) => setSelectedTime(time)}
                     mode="time"
-                  />
-                  label=""
                   />
                 </View>
               </PlanDateStep2>

@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { MONGODB_API_BASE_URL, API_ENDPOINTS } from '../config/mongodb';
+import { API_ENDPOINTS, apiRequest } from '../config/mongodb';
 
 export interface DailyMoment {
     id?: string; // MongoDB document ID for editing
@@ -118,23 +118,13 @@ export class MomentService {
 
             console.log(`📤 Uploading moment to MongoDB...`);
 
-            // Upload to backend
-            const response = await fetch(`${MONGODB_API_BASE_URL}${API_ENDPOINTS.MOMENTS.UPLOAD}`, {
+            // Upload to backend via apiRequest
+            const data = await apiRequest<any>(API_ENDPOINTS.MOMENTS.UPLOAD, {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    // Don't set Content-Type - let browser set with boundary
-                },
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: response.statusText }));
-                throw new Error(errorData.error || `Upload failed: ${response.status}`);
-            }
-
-            const data = await response.json();
             console.log(`✅ Moment uploaded successfully`);
-
             return data.url;
         } catch (error) {
             console.error('Error uploading image:', error);
@@ -181,15 +171,9 @@ export class MomentService {
      */
     static async getTodayMoment(userId: string, partnerId: string): Promise<CoupleMoment | null> {
         try {
-            const response = await fetch(
-                `${MONGODB_API_BASE_URL}${API_ENDPOINTS.MOMENTS.GET_TODAY(userId, partnerId)}`
+            const data = await apiRequest<any>(
+                API_ENDPOINTS.MOMENTS.GET_TODAY(userId, partnerId)
             );
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch moment: ${response.status}`);
-            }
-
-            const data = await response.json();
 
             if (!data.success) {
                 return null;
@@ -306,21 +290,13 @@ export class MomentService {
         caption: string
     ): Promise<boolean> {
         try {
-            const response = await fetch(
-                `${MONGODB_API_BASE_URL}${API_ENDPOINTS.MOMENTS.UPDATE_CAPTION(momentId)}`,
+            await apiRequest<any>(
+                API_ENDPOINTS.MOMENTS.UPDATE_CAPTION(momentId),
                 {
                     method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify({ userId, caption }),
                 }
             );
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to update caption');
-            }
 
             console.log('✅ Caption updated successfully');
             return true;
