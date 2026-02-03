@@ -162,8 +162,8 @@ router.post(
 
 // ===== SERVE FILES FROM GRIDFS =====
 // GET /api/media/file/:fileId
-// Note: File serving can be optionally authenticated for public media
-router.get('/file/:fileId', requireAuth, async (req: Request, res: Response) => {
+// Note: Public endpoint - file IDs are random UUIDs so not guessable
+router.get('/file/:fileId', async (req: Request, res: Response) => {
   try {
     const { fileId } = req.params;
 

@@ -26,7 +26,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_MONGODB_API_URL": "https://7702e225deff.ngrok-free.app/api"
+        "EXPO_PUBLIC_MONGODB_API_URL": "https://sync-6m58.onrender.com/api"
       }
     },
     "production": {
