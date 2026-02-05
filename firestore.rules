@@ -240,10 +240,25 @@ service cloud.firestore {
       allow delete: if isOwner(resource.data.userId);
     }
 
+    // ===== SIGNALS COLLECTION =====
+    match /signals/{signalId} {
+      // Users can read signals sent to them
+      allow read: if isAuthenticated() &&
+        resource.data.toUserId == userId();
+
+      // Users can create signals from themselves
+      allow create: if isAuthenticated() &&
+        request.resource.data.fromUserId == userId();
+
+      // Users can delete signals they sent or received
+      allow delete: if isAuthenticated() &&
+        (resource.data.fromUserId == userId() || resource.data.toUserId == userId());
+    }
+
     // ===== PRESENCE COLLECTION =====
     match /presence/{presenceId} {
-      // Both partners can read presence
-      allow read: if isAuthenticated() && isPairMember(resource.data.pairId);
+      // Both partners can read presence (hasPair ensures user is paired)
+      allow read: if isAuthenticated() && hasPair();
 
       // Users can create/update their own presence
       allow create, update: if isAuthenticated() &&
@@ -271,20 +286,19 @@ service cloud.firestore {
     }
 
     // ===== DAILY ECHO COLLECTION =====
-    match /dailyEcho/{echoId} {
+    match /dailyEchos/{echoId} {
       // Both partners can read daily echo
       allow read: if isAuthenticated() && isPairMember(resource.data.pairId);
 
-      // Users can create their own daily echo
+      // Both partners can create daily echo for their pair
       allow create: if isAuthenticated() &&
-        request.resource.data.userId == userId() &&
         request.resource.data.pairId == userPairId();
 
-      // Only creator can update
-      allow update: if isOwner(resource.data.userId);
+      // Both partners can update (to submit answers, mark revealed)
+      allow update: if isAuthenticated() && isPairMember(resource.data.pairId);
 
-      // Only creator can delete
-      allow delete: if isOwner(resource.data.userId);
+      // Both partners can delete
+      allow delete: if isAuthenticated() && isPairMember(resource.data.pairId);
     }
 
     // ===== PUSH TOKENS COLLECTION =====

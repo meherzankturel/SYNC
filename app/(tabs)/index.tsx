@@ -1040,6 +1040,7 @@ export default function HomeScreen() {
             try {
                 const q = query(
                     collection(db, 'sosEvents'),
+                    where('pairId', '==', userData.pairId),
                     where('userId', '==', userData.partnerId),
                     where('responded', '==', false),
                     orderBy('timestamp', 'desc'),
@@ -1053,6 +1054,7 @@ export default function HomeScreen() {
                 try {
                     const simpleQ = query(
                         collection(db, 'sosEvents'),
+                        where('pairId', '==', userData.pairId),
                         where('userId', '==', userData.partnerId),
                         where('responded', '==', false),
                         limit(1)
@@ -1141,6 +1143,7 @@ export default function HomeScreen() {
         try {
             const q = query(
                 collection(db, 'sosEvents'),
+                where('pairId', '==', userData.pairId),
                 where('userId', '==', userData.partnerId),
                 where('responded', '==', false),
                 orderBy('timestamp', 'desc'),

@@ -15,20 +15,18 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ResponsiveUtils } from '../src/utils/responsive';
-import { db } from '../src/config/firebase';
+import { db, functions } from '../src/config/firebase';
 import {
     doc,
     setDoc,
     getDoc,
-    updateDoc,
     serverTimestamp,
-    writeBatch
 } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { useAuth } from '../src/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
-import { PairService } from '../src/services/pair.service';
 import { StatusBar } from 'expo-status-bar';
 
 // Doodle Theme Colors
@@ -101,120 +99,29 @@ export default function InviteScreen() {
         setLoading(true);
         try {
             const code = inviteCode.toUpperCase().trim();
-            const inviteRef = doc(db, 'invites', code);
-            const inviteSnap = await getDoc(inviteRef);
-
-            if (!inviteSnap.exists()) {
-                Alert.alert('Invalid Code', 'This invite code does not exist.');
-                setLoading(false);
-                return;
-            }
-
-            const inviteData = inviteSnap.data();
-            if (inviteData.status !== 'pending') {
-                Alert.alert('Code Expired', 'This code has already been used.');
-                setLoading(false);
-                return;
-            }
-
-            if (inviteData.creatorId === user.uid) {
-                Alert.alert('Wait!', 'You cannot use your own invite code.');
-                setLoading(false);
-                return;
-            }
-
-            // Check if current user already has a partner
-            const currentUserDoc = await getDoc(doc(db, 'users', user.uid));
-            const currentUserData = currentUserDoc.data();
-
-            if (currentUserData?.pairId || currentUserData?.partnerId) {
-                // Check if they're already paired with the creator
-                if (currentUserData.partnerId === inviteData.creatorId) {
-                    Alert.alert(
-                        'Already Connected',
-                        'You are already paired with this partner!',
-                        [{ text: 'OK' }]
-                    );
-                } else {
-                    Alert.alert(
-                        'Already Paired',
-                        'You are already connected with another partner. Please disconnect your current partner before joining a new one.',
-                        [{ text: 'OK' }]
-                    );
-                }
-                setLoading(false);
-                return;
-            }
-
-            // Get creator's user data
-            const creatorDoc = await getDoc(doc(db, 'users', inviteData.creatorId));
-            const creatorData = creatorDoc.data();
-
-            // Check if creator already has a partner
-            if (creatorData?.pairId || creatorData?.partnerId) {
-                // Check if creator is already paired with current user
-                if (creatorData.partnerId === user.uid) {
-                    Alert.alert(
-                        'Already Connected',
-                        'You are already paired with this partner!',
-                        [{ text: 'OK' }]
-                    );
-                } else {
-                    Alert.alert(
-                        'Partner Already Connected',
-                        'The person who created this invite code is already connected with another partner.',
-                        [{ text: 'OK' }]
-                    );
-                }
-                setLoading(false);
-                return;
-            }
-
-            // Generate a pairId for this connection
-            const pairId = `pair_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-            const batch = writeBatch(db);
-
-            // Create or update the pair document
-            const pairRef = doc(db, 'pairs', pairId);
-            batch.set(pairRef, {
-                pairId: pairId,
-                user1Id: inviteData.creatorId,
-                user2Id: user.uid,
-                user1Email: creatorData?.email || '',
-                user2Email: user.email || '',
-                status: 'active',
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-            });
-
-            // Update both users with partnerId and pairId
-            batch.set(doc(db, 'users', user.uid), {
-                partnerId: inviteData.creatorId,
-                email: user.email,
-                pairId: pairId,
-                updatedAt: serverTimestamp()
-            }, { merge: true });
-
-            batch.set(doc(db, 'users', inviteData.creatorId), {
-                partnerId: user.uid,
-                pairId: pairId,
-                updatedAt: serverTimestamp()
-            }, { merge: true });
-
-            batch.update(inviteRef, {
-                status: 'accepted',
-                acceptedBy: user.uid,
-                acceptedAt: serverTimestamp()
-            });
-
-            await batch.commit();
+            const acceptInviteFn = httpsCallable(functions, 'acceptInvite');
+            await acceptInviteFn({ code });
             Alert.alert('Success!', 'Accounts linked! Welcome home.', [
                 { text: 'OK', onPress: () => router.replace('/(tabs)') }
             ]);
         } catch (err: any) {
             console.error('Join error:', err);
-            Alert.alert('Error', err.message || 'Something went wrong while joining.');
+            // Map Cloud Function error codes to user-friendly messages
+            const errorCode = err?.code;
+            const errorMessage = err?.message || '';
+            if (errorCode === 'functions/not-found' || errorMessage.includes('Invalid invite code')) {
+                Alert.alert('Invalid Code', 'This invite code does not exist.');
+            } else if (errorMessage.includes('already been used')) {
+                Alert.alert('Code Expired', 'This code has already been used.');
+            } else if (errorMessage.includes('your own invite')) {
+                Alert.alert('Wait!', 'You cannot use your own invite code.');
+            } else if (errorMessage.includes('already paired with this partner')) {
+                Alert.alert('Already Connected', 'You are already paired with this partner!');
+            } else if (errorMessage.includes('already connected')) {
+                Alert.alert('Already Paired', errorMessage);
+            } else {
+                Alert.alert('Error', errorMessage || 'Something went wrong while joining.');
+            }
         } finally {
             setLoading(false);
         }
