@@ -1977,7 +1977,7 @@ const styles = StyleSheet.create({
 
     scrollContent: {
         paddingHorizontal: theme.spacing.md,
-        paddingBottom: theme.spacing['2xl'],
+        paddingBottom: theme.components.tabBar.scrollPaddingBottom,
     },
 
     // Header

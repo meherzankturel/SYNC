@@ -412,6 +412,23 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.userId == userId();
     }
 
+    // ===== TIC TAC TOE GAMES COLLECTION =====
+    match /ticTacToeGames/{gameId} {
+      // Both partners can read games
+      allow read: if isAuthenticated() &&
+        (resource == null || isPairMember(resource.data.pairId));
+
+      // Users can create games for their pair
+      allow create: if isAuthenticated() &&
+        request.resource.data.pairId == userPairId();
+
+      // Both partners can update games (for moves)
+      allow update: if isAuthenticated() && isPairMember(resource.data.pairId);
+
+      // Both partners can delete games
+      allow delete: if isAuthenticated() && isPairMember(resource.data.pairId);
+    }
+
     // ===== CATCH-ALL: Deny all other access =====
     // This ensures any collection not explicitly defined is protected
     match /{document=**} {

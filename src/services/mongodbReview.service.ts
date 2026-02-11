@@ -72,7 +72,7 @@ export function startReviewPolling(
   intervalMs: number = 5000
 ): () => void {
   let isPolling = true;
-  let pollInterval: NodeJS.Timeout | null = null;
+  let pollInterval: ReturnType<typeof setTimeout> | null = null;
 
   const poll = async () => {
     if (!isPolling) return;

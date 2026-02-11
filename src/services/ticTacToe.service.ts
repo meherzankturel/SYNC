@@ -200,6 +200,9 @@ export class TicTacToeService {
             } else {
                 callback(null);
             }
+        }, (error) => {
+            console.warn('TicTacToe game listener error:', error);
+            callback(null);
         });
     }
 

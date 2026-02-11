@@ -46,7 +46,8 @@ export default function HeartEffect({ trigger, duration = 3000, heartCount, sing
             
             for (let i = 0; i < heartsToShow; i++) {
                 const heartId = heartIdCounter.current++;
-                const x = new Animated.Value(Math.random() * SCREEN_WIDTH);
+                const initialX = Math.random() * SCREEN_WIDTH;
+                const x = new Animated.Value(initialX);
                 const y = new Animated.Value(SCREEN_HEIGHT + 50); // Start below screen
                 const scale = new Animated.Value(0);
                 const opacity = new Animated.Value(0);
@@ -65,7 +66,7 @@ export default function HeartEffect({ trigger, duration = 3000, heartCount, sing
 
                 // Random horizontal drift
                 const horizontalDrift = (Math.random() - 0.5) * 100;
-                const finalX = x._value + horizontalDrift;
+                const finalX = initialX + horizontalDrift;
 
                 // Random size variation
                 const sizeMultiplier = Math.random() * 0.5 + 0.5; // 0.5x to 1x size

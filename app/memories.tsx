@@ -180,7 +180,7 @@ export default function MemoriesScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity
@@ -248,9 +248,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: theme.spacing.xl,
+        height: theme.spacing.xl,
+        borderRadius: theme.borderRadius.full,
         backgroundColor: theme.colors.background,
         borderWidth: 2,
         borderColor: '#000',
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
         color: '#000',
     },
     headerRight: {
-        width: 40,
+        width: theme.spacing.xl,
     },
     listContent: {
         padding: theme.spacing.md,

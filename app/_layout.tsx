@@ -3,6 +3,8 @@ import { useFonts } from 'expo-font';
 import { useCallback, useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { View, LogBox } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '../src/contexts/AuthContext';
 import ErrorBoundary from '../src/components/ErrorBoundary';
 
@@ -35,16 +37,19 @@ export default function RootLayout() {
     }
 
     return (
-        <ErrorBoundary>
-            <AuthProvider>
-                <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-                    <Stack screenOptions={{ headerShown: false }}>
-                        <Stack.Screen name="index" />
-                        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    </Stack>
-                </View>
-            </AuthProvider>
-        </ErrorBoundary>
+        <SafeAreaProvider>
+            <ErrorBoundary>
+                <AuthProvider>
+                    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+                        <StatusBar style="dark" />
+                        <Stack screenOptions={{ headerShown: false }}>
+                            <Stack.Screen name="index" />
+                            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                        </Stack>
+                    </View>
+                </AuthProvider>
+            </ErrorBoundary>
+        </SafeAreaProvider>
     );
 }

@@ -476,10 +476,10 @@ export default function DateReviewModal({
 
       // Prepare review data - use uploaded URLs (already filtered)
       const finalImages = uploadedImageURLs.filter((url): url is string =>
-        url && typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))
+        !!url && typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))
       );
       const finalVideos = uploadedVideoURLs.filter((url): url is string =>
-        url && typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))
+        !!url && typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))
       );
 
       const reviewData: {

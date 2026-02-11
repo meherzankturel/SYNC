@@ -3,11 +3,17 @@ import { View, TouchableOpacity, StyleSheet, Text, Platform } from 'react-native
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../config/theme';
 
 export const DoodleTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
+    const insets = useSafeAreaInsets();
+    // Position tab bar above the home indicator / navigation bar
+    // Use at least 16px on devices without a home indicator
+    const bottomOffset = Math.max(insets.bottom, 16);
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { bottom: bottomOffset }]}>
             <BlurView intensity={80} tint="light" style={styles.blurContainer}>
                 <View style={styles.tabContainer}>
                     {state.routes
@@ -17,10 +23,6 @@ export const DoodleTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
                             const originalIndex = state.routes.findIndex(r => r.key === route.key);
                             const { options } = descriptors[route.key];
                             const isFocused = state.index === originalIndex;
-
-                            // Access the tab bar icon function from options
-                            // We'll call it with our custom styling props
-                            const IconComponent = options.tabBarIcon;
 
                             const onPress = () => {
                                 const event = navigation.emit({
@@ -47,7 +49,7 @@ export const DoodleTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
                                     accessibilityRole="button"
                                     accessibilityState={isFocused ? { selected: true } : {}}
                                     accessibilityLabel={options.tabBarAccessibilityLabel}
-                                    testID={options.tabBarTestID}
+                                    testID={options.tabBarButtonTestID}
                                     onPress={onPress}
                                     onLongPress={onLongPress}
                                     style={styles.tabButton}
@@ -56,7 +58,7 @@ export const DoodleTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
                                         <View style={styles.activeTabBackground}>
                                             <Ionicons
                                                 name={getIconName(route.name, true) as any}
-                                                size={24}
+                                                size={theme.components.tabBar.iconSize}
                                                 color="#FFFFFF"
                                             />
                                         </View>
@@ -80,9 +82,9 @@ export const DoodleTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
 const getIconName = (routeName: string, focused: boolean) => {
     switch (routeName) {
         case 'index':
-            return focused ? 'home' : 'home-outline'; // material-symbols: house / home
+            return focused ? 'home' : 'home-outline';
         case 'moods':
-            return focused ? 'heart' : 'heart-outline'; // favorite (in google fonts) -> heart
+            return focused ? 'heart' : 'heart-outline';
         case 'date-nights':
             return focused ? 'calendar' : 'calendar-outline';
         case 'games':
@@ -97,7 +99,6 @@ const getIconName = (routeName: string, focused: boolean) => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 24,
         left: 0,
         right: 0,
         alignItems: 'center',
@@ -105,11 +106,11 @@ const styles = StyleSheet.create({
     },
     blurContainer: {
         width: '100%',
-        maxWidth: 340,
+        maxWidth: theme.components.tabBar.maxWidth,
         borderRadius: 50,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(232, 224, 240, 0.6)', // light purple border
+        borderColor: 'rgba(232, 224, 240, 0.6)',
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
             },
             android: {
                 elevation: 10,
-                backgroundColor: 'rgba(255,255,255,0.9)', // Fallback for no blur on android sometimes
+                backgroundColor: 'rgba(255,255,255,0.9)',
             },
         }),
     },
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 8,
         paddingHorizontal: 16,
-        backgroundColor: 'rgba(255,255,255,0.5)', // Extra layer for feel
+        backgroundColor: 'rgba(255,255,255,0.5)',
     },
     tabButton: {
         alignItems: 'center',
@@ -137,13 +138,13 @@ const styles = StyleSheet.create({
         padding: 4,
     },
     activeTabBackground: {
-        backgroundColor: theme.colors.primary, // #7f13ec
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        backgroundColor: theme.colors.primary,
+        width: theme.components.tabBar.activeSize,
+        height: theme.components.tabBar.activeSize,
+        borderRadius: theme.components.tabBar.activeSize / 2,
         alignItems: 'center',
         justifyContent: 'center',
-        transform: [{ scale: 1.1 }], // Slight pop
+        transform: [{ scale: 1.1 }],
         ...Platform.select({
             ios: {
                 shadowColor: '#7f13ec',

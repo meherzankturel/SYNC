@@ -6,9 +6,11 @@ import { auth } from '../../src/config/firebase';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { theme } from '../../src/config/theme';
 
-// Doodle Theme Colors
+// Use theme colors directly
 const colors = {
+    ...theme.colors,
     background: '#fefefe',
     surface: '#ffffff',
     surfaceSoft: '#f8f5ff',
@@ -52,7 +54,7 @@ export default function ForgotPasswordScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             <StatusBar style="dark" />
 
             <View style={styles.header}>
@@ -127,21 +129,21 @@ const styles = StyleSheet.create({
         backgroundColor: colors.background,
     },
     header: {
-        paddingHorizontal: 20,
-        paddingTop: Platform.OS === 'android' ? 40 : 10,
+        paddingHorizontal: theme.spacing.md,
+        paddingVertical: theme.spacing.sm,
     },
     backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 12,
+        width: theme.spacing.xl,
+        height: theme.spacing.xl,
+        borderRadius: theme.borderRadius.md,
         backgroundColor: colors.surfaceSoft,
         alignItems: 'center',
         justifyContent: 'center',
     },
     content: {
         flex: 1,
-        padding: 30,
-        paddingTop: 20,
+        padding: theme.spacing.lg,
+        paddingTop: theme.spacing.md,
         alignItems: 'center',
     },
     iconContainer: {

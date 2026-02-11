@@ -21,25 +21,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { theme } from '../../src/config/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Doodle Theme Colors
-const colors = {
-    background: '#fefefe',
-    surface: '#ffffff',
-    surfaceSoft: '#f8f5ff',
-    primary: '#7f13ec',
-    primaryDark: '#6910c2',
-    text: '#141118',
-    textSecondary: '#756189',
-    textMuted: '#9a8ba8',
-    border: '#e8e0f0',
-    doodlePink: '#ff85a2',
-    doodlePurple: '#a855f7',
-    error: '#FF6B6B',
-    success: '#4ADE80',
-};
+// Use theme colors directly
+const colors = theme.colors;
 
 // Decorative Doodle Components (using Views instead of SVG)
 const HeartDoodle = ({ style }: { style?: any }) => (
@@ -355,7 +343,7 @@ export default function LoginScreen() {
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             <StatusBar style="dark" />
 
             <HeartDoodle style={styles.heartDoodle} />
@@ -498,7 +486,7 @@ export default function LoginScreen() {
                     </ScrollView>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -514,9 +502,9 @@ const styles = StyleSheet.create({
     dotDoodle2: { position: 'absolute', bottom: 200, left: 50, zIndex: 1 },
     scrollContent: {
         flexGrow: 1,
-        paddingHorizontal: 28,
-        paddingTop: 80,
-        paddingBottom: 40,
+        paddingHorizontal: theme.spacing.lg,
+        paddingTop: theme.spacing['3xl'],
+        paddingBottom: theme.spacing.xl,
     },
     logoSection: {
         alignItems: 'center',
@@ -527,7 +515,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     logoText: {
-        fontSize: 42,
+        fontSize: theme.typography.fontSize['4xl'],
         fontWeight: '300',
         color: colors.primary,
         fontStyle: 'italic',
@@ -542,13 +530,13 @@ const styles = StyleSheet.create({
         transform: [{ rotate: '-2deg' }],
     },
     welcomeText: {
-        fontSize: 28,
+        fontSize: theme.typography.fontSize['3xl'],
         fontWeight: '600',
         color: colors.text,
-        marginBottom: 8,
+        marginBottom: theme.spacing.sm,
     },
     tagline: {
-        fontSize: 15,
+        fontSize: theme.typography.fontSize.base,
         color: colors.textSecondary,
         letterSpacing: 0.3,
     },
@@ -559,9 +547,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     inputLabel: {
-        fontSize: 13,
+        fontSize: theme.typography.fontSize.sm,
         color: colors.textSecondary,
-        marginBottom: 8,
+        marginBottom: theme.spacing.sm,
         fontWeight: '500',
     },
     inputContainer: {
@@ -577,8 +565,8 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        paddingVertical: 14,
-        fontSize: 16,
+        paddingVertical: theme.spacing.sm,
+        fontSize: theme.typography.fontSize.md,
         color: colors.text,
     },
     eyeButton: {
@@ -592,7 +580,7 @@ const styles = StyleSheet.create({
     },
     forgotText: {
         color: colors.primary,
-        fontSize: 14,
+        fontSize: theme.typography.fontSize.base,
         fontWeight: '500',
     },
     primaryButton: {
@@ -613,7 +601,7 @@ const styles = StyleSheet.create({
     },
     secondaryButtonText: {
         color: colors.textSecondary,
-        fontSize: 16,
+        fontSize: theme.typography.fontSize.md,
         fontWeight: '600',
     },
     buttonInner: {
@@ -626,7 +614,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#ffffff',
-        fontSize: 16,
+        fontSize: theme.typography.fontSize.md,
         fontWeight: '600',
         letterSpacing: 0.5,
     },
@@ -639,11 +627,11 @@ const styles = StyleSheet.create({
     },
     toggleText: {
         color: colors.textSecondary,
-        fontSize: 15,
+        fontSize: theme.typography.fontSize.base,
     },
     toggleLink: {
         color: colors.primary,
-        fontSize: 15,
+        fontSize: theme.typography.fontSize.base,
         fontWeight: '600',
     },
     footer: {

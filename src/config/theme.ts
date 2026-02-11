@@ -33,6 +33,7 @@ export const theme = {
     // Doodle accent colors
     accent: '#7f13ec',            // Same as primary
     accentPink: '#ff85a2',        // Doodle pink
+    accentCoral: '#FF6B6B',       // Coral accent
     accentMint: '#4ADE80',        // Bright mint (online)
     accentGold: '#FBBF24',        // Bright gold
     accentSky: '#38BDF8',         // Sky blue
@@ -89,6 +90,9 @@ export const theme = {
     // Memories screen gradient
     memories: ['#fefefe', '#faf8f5', '#f8f5ff'],
     memoriesAlt: ['#fefefe', '#faf8f5'],
+
+    // Warm gradient
+    warmth: ['#ff85a2', '#FF6B6B'],
 
     // Button gradients
     button: ['#7f13ec', '#6910c2'],
@@ -236,6 +240,7 @@ export const theme = {
       gentle: { tension: 40, friction: 7 },
       bouncy: { tension: 100, friction: 5 },
       stiff: { tension: 200, friction: 10 },
+      jelly: { tension: 50, friction: 3 },
     },
   },
 
@@ -267,6 +272,11 @@ export const theme = {
       height: verticalScale(80),
       fabSize: scale(56),
       iconSize: scale(24),
+      activeSize: scale(50),
+      maxWidth: scale(340),
+      // Bottom padding for scroll content in tab screens
+      // Accounts for floating tab bar height + gap below it
+      scrollPaddingBottom: verticalScale(120),
     },
 
     // Avatar

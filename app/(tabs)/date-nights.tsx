@@ -27,7 +27,6 @@ import { PolaroidMemoryCard } from '../../src/components/PolaroidMemoryCard';
 import { MemoryStats } from '../../src/components/MemoryStats';
 import { theme } from '../../src/config/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { debugPairIdConsistency } from '../../src/utils/pairIdDebug';
 import { Timestamp } from 'firebase/firestore';
 import * as Linking from 'expo-linking';
 import * as Notifications from 'expo-notifications';
@@ -1856,7 +1855,7 @@ export default function DateNightsScreen() {
           transparent={false}
           onRequestClose={() => setShowModal(false)}
         >
-          <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+          <View style={{ flex: 1, backgroundColor: '#fff' }}>
             {createStep === 1 && (
               <PlanDateDoodle
                 title={title}
@@ -1919,7 +1918,7 @@ export default function DateNightsScreen() {
                 submitting={submitting}
               />
             )}
-          </SafeAreaView>
+          </View>
         </Modal>
 
         {/* Review Modal */}
@@ -2460,7 +2459,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: theme.spacing.md,
-    paddingBottom: theme.spacing.xl,
+    paddingBottom: theme.components.tabBar.scrollPaddingBottom,
   },
   emptyContainer: {
     flex: 1,

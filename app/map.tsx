@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../src/config/firebase';
+import { theme } from '../src/config/theme';
 import { LocationService } from '../src/services/location.service';
 import { MoodService, Mood } from '../src/services/mood.service';
 import WidgetService from '../src/services/widget.service';
@@ -102,6 +103,8 @@ export default function MapScreen() {
             if (snap.exists()) {
                 setUserData(snap.data() as UserData);
             }
+        }, (error: any) => {
+            console.warn('[Map] User listener error:', error.code || error.message);
         });
 
         return () => unsubscribe();
@@ -116,6 +119,9 @@ export default function MapScreen() {
             if (snap.exists()) {
                 setPartnerData(snap.data() as UserData);
             }
+            setLoading(false);
+        }, (error: any) => {
+            console.warn('[Map] Partner listener error:', error.code || error.message);
             setLoading(false);
         });
 
@@ -210,7 +216,7 @@ export default function MapScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -375,37 +381,37 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fefefe',
+        backgroundColor: theme.colors.background,
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#fefefe',
+        backgroundColor: theme.colors.background,
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: '#fefefe',
+        paddingHorizontal: theme.spacing.md,
+        paddingVertical: theme.spacing.sm,
+        backgroundColor: theme.colors.background,
     },
     backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 12,
-        backgroundColor: '#f8f5ff',
+        width: theme.spacing.xl,
+        height: theme.spacing.xl,
+        borderRadius: theme.borderRadius.md,
+        backgroundColor: theme.colors.surfaceSoft,
         alignItems: 'center',
         justifyContent: 'center',
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: theme.typography.fontSize.lg,
         fontWeight: '600',
-        color: '#141118',
+        color: theme.colors.text,
     },
     headerRight: {
-        width: 40,
+        width: theme.spacing.xl,
     },
     mapContainer: {
         flex: 1,

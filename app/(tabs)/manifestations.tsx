@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: theme.spacing.md,
-    paddingBottom: theme.spacing.xl,
+    paddingBottom: theme.components.tabBar.scrollPaddingBottom,
   },
   emptyContainer: {
     justifyContent: 'center',

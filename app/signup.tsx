@@ -7,9 +7,11 @@ import { Button } from '../src/components/Button';
 import { theme } from '../src/config/theme';
 import { AuthService } from '../src/services/auth.service';
 import { Ionicons } from '@expo/vector-icons';
-import { ResponsiveUtils } from '../src/utils/responsive'; // Ensure responsive utils are used
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ResponsiveUtils } from '../src/utils/responsive';
 
 export default function SignUpScreen() {
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -210,7 +212,7 @@ export default function SignUpScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={[styles.container, { paddingTop: insets.top }]}
     >
       <StatusBar style="dark" />
 
@@ -258,7 +260,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
   },
   header: {
     flexDirection: 'row',

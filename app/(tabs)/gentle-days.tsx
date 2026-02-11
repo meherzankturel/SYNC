@@ -336,6 +336,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: theme.spacing.md,
+    paddingBottom: theme.components.tabBar.scrollPaddingBottom,
   },
   centerContent: {
     flex: 1,

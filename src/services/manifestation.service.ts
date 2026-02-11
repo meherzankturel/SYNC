@@ -5,6 +5,7 @@ import {
   updateDoc,
   deleteDoc,
   getDocs,
+  getDoc,
   query,
   where,
   orderBy,
@@ -12,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import * as Notifications from 'expo-notifications';
+import { SchedulableTriggerInputTypes } from 'expo-notifications';
 
 export interface Manifestation {
   id?: string;
@@ -148,7 +150,7 @@ export class ManifestationService {
   ): Promise<void> {
     try {
       const manifestationRef = doc(db, 'manifestations', manifestationId);
-      const current = await manifestationRef.get();
+      const current = await getDoc(manifestationRef);
       const currentData = current.data() as Manifestation;
       
       const updates: any = {
@@ -188,9 +190,9 @@ export class ManifestationService {
           sound: true,
         },
         trigger: {
+          type: SchedulableTriggerInputTypes.DAILY,
           hour: hours,
           minute: minutes,
-          repeats: true,
         },
       });
     } catch (error: any) {

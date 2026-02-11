@@ -28,6 +28,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { StatusBar } from 'expo-status-bar';
+import { theme } from '../src/config/theme';
 
 // Doodle Theme Colors
 const colors = {
@@ -128,7 +129,7 @@ export default function InviteScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             <StatusBar style="dark" />
 
             <View style={styles.header}>
@@ -217,19 +218,19 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingHorizontal: theme.spacing.md,
+        paddingVertical: theme.spacing.sm,
     },
     backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 12,
+        width: theme.spacing.xl,
+        height: theme.spacing.xl,
+        borderRadius: theme.borderRadius.md,
         backgroundColor: colors.surfaceSoft,
         alignItems: 'center',
         justifyContent: 'center',
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: theme.typography.fontSize.lg,
         fontWeight: '600',
         color: colors.text,
     },

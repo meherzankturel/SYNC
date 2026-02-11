@@ -37,6 +37,9 @@ export default function GentleDaysSettingsScreen() {
         setUserData(data);
       }
       setLoading(false);
+    }, (error: any) => {
+      console.warn('[GentleDaysSettings] User listener error:', error.code || error.message);
+      setLoading(false);
     });
 
     return unsubscribe;
@@ -79,7 +82,7 @@ export default function GentleDaysSettingsScreen() {
 
   if (loading || !settings) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
@@ -88,7 +91,7 @@ export default function GentleDaysSettingsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />

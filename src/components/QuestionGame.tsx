@@ -8,11 +8,11 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   Animated,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../config/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { Input } from './Input';

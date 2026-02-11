@@ -52,11 +52,17 @@ export default function SOSSettingsScreen() {
                             setPartnerData(partnerSnap.data());
                         }
                         setLoading(false);
+                    }, (error: any) => {
+                        console.warn('[SOS] Partner listener error:', error.code || error.message);
+                        setLoading(false);
                     });
                 } else {
                     setLoading(false);
                 }
             }
+        }, (error: any) => {
+            console.warn('[SOS] User listener error:', error.code || error.message);
+            setLoading(false);
         });
 
         return unsubscribe;
@@ -180,7 +186,7 @@ export default function SOSSettingsScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView style={styles.container} edges={['top']}>
+            <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
                 <View style={styles.centerContent}>
                     <ActivityIndicator size="large" color={theme.colors.primary} />
                 </View>
@@ -189,7 +195,7 @@ export default function SOSSettingsScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={theme.colors.text} />

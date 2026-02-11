@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../../../config/theme';
 import { WobblyCard } from '../index';
 
@@ -31,11 +32,12 @@ export const PlanDateDoodle: React.FC<PlanDateDoodleProps> = ({
     onBack,
     children
 }) => {
+    const insets = useSafeAreaInsets();
     return (
         <View style={styles.container}>
             {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={onBack}>
+            <View style={[styles.header, { paddingTop: insets.top + theme.spacing.sm }]}>
+                <TouchableOpacity onPress={onBack} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color="#000" />
                 </TouchableOpacity>
                 {/* Progress Indicators */}
@@ -121,9 +123,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 20,
+        paddingHorizontal: theme.spacing.md,
         marginBottom: 40,
+    },
+    backButton: {
+        width: theme.spacing.xl,
+        height: theme.spacing.xl,
+        borderRadius: theme.borderRadius.md,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     progressContainer: {
         flexDirection: 'row',

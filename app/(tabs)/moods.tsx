@@ -984,8 +984,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   avatarContainer: {
-    width: 64,
-    height: 64,
+    width: theme.components.avatar.lg,
+    height: theme.components.avatar.lg,
     overflow: 'hidden',
   },
   avatarImage: {
@@ -994,7 +994,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   avatarLabel: {
-    fontSize: 10,
+    fontSize: theme.typography.fontSize.xs,
     fontWeight: '900',
     textTransform: 'uppercase',
     letterSpacing: 1.5,
@@ -1020,8 +1020,8 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-2deg' }],
   },
   headerTitle: {
-    fontSize: 32,
-    fontFamily: Platform.OS === 'ios' ? 'Noteworthy-Bold' : 'sans-serif-medium', // Fallback for 'handwritten'
+    fontSize: theme.typography.fontSize['3xl'],
+    fontFamily: Platform.OS === 'ios' ? 'Noteworthy-Bold' : 'sans-serif-medium',
     color: theme.colors.text,
   },
 
@@ -1030,8 +1030,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 100, // Space for bottom nav
+    paddingHorizontal: theme.spacing.lg,
+    paddingBottom: theme.components.tabBar.scrollPaddingBottom,
   },
 
   // Timeline
@@ -1106,9 +1106,9 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   promptTitle: {
-    fontSize: 32,
+    fontSize: theme.typography.fontSize['3xl'],
     fontFamily: Platform.OS === 'ios' ? 'Noteworthy-Bold' : 'sans-serif-medium',
-    marginBottom: 32,
+    marginBottom: theme.spacing.xl,
     color: theme.colors.text,
     transform: [{ rotate: '-1deg' }],
   },
@@ -1116,9 +1116,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 20,
-    marginBottom: 20,
-    paddingHorizontal: 10,
+    gap: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+    paddingHorizontal: theme.spacing.sm,
   },
   moodBtn: {
     alignItems: 'center',
@@ -1142,7 +1142,7 @@ const styles = StyleSheet.create({
   // Utility
   emptyContainer: {
     alignItems: 'center',
-    padding: 20,
+    padding: theme.spacing.md,
   },
   emptyText: {
     color: theme.colors.textMuted,
@@ -1163,7 +1163,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   historyButtonText: {
-    fontSize: 14,
+    fontSize: theme.typography.fontSize.base,
     fontWeight: '600',
     color: theme.colors.textSecondary,
     textTransform: 'uppercase',

@@ -39,7 +39,7 @@
         "autoIncrement": true
       },
       "env": {
-        "EXPO_PUBLIC_MONGODB_API_URL": "https://your-production-backend.vercel.app/api"
+        "EXPO_PUBLIC_MONGODB_API_URL": "https://sync-6m58.onrender.com/api"
       }
     }
   },

@@ -13,6 +13,8 @@ interface Star {
   opacity: Animated.Value;
   scale: Animated.Value;
   rotation: Animated.Value;
+  initialY: number;
+  initialScale: number;
 }
 
 export function AnimatedStars({ count = 30 }: { count?: number }) {
@@ -20,14 +22,20 @@ export function AnimatedStars({ count = 30 }: { count?: number }) {
 
   useEffect(() => {
     // Initialize stars
-    starsRef.current = Array.from({ length: count }, (_, i) => ({
-      id: i,
-      x: new Animated.Value(Math.random() * width),
-      y: new Animated.Value(Math.random() * height),
-      opacity: new Animated.Value(0.3 + Math.random() * 0.4),
-      scale: new Animated.Value(0.5 + Math.random() * 0.5),
-      rotation: new Animated.Value(0),
-    }));
+    starsRef.current = Array.from({ length: count }, (_, i) => {
+      const initialY = Math.random() * height;
+      const initialScale = 0.5 + Math.random() * 0.5;
+      return {
+        id: i,
+        x: new Animated.Value(Math.random() * width),
+        y: new Animated.Value(initialY),
+        opacity: new Animated.Value(0.3 + Math.random() * 0.4),
+        scale: new Animated.Value(initialScale),
+        rotation: new Animated.Value(0),
+        initialY,
+        initialScale,
+      };
+    });
 
     // Animate stars
     starsRef.current.forEach((star) => {
@@ -36,7 +44,7 @@ export function AnimatedStars({ count = 30 }: { count?: number }) {
         Animated.sequence([
           Animated.parallel([
             Animated.timing(star.y, {
-              toValue: star.y._value + (Math.random() * 100 - 50),
+              toValue: star.initialY + (Math.random() * 100 - 50),
               duration: 2000 + Math.random() * 3000,
               useNativeDriver: true,
             }),
@@ -48,7 +56,7 @@ export function AnimatedStars({ count = 30 }: { count?: number }) {
           ]),
           Animated.parallel([
             Animated.timing(star.y, {
-              toValue: star.y._value - (Math.random() * 100 - 50),
+              toValue: star.initialY - (Math.random() * 100 - 50),
               duration: 2000 + Math.random() * 3000,
               useNativeDriver: true,
             }),
@@ -74,12 +82,12 @@ export function AnimatedStars({ count = 30 }: { count?: number }) {
       const pulseAnimation = Animated.loop(
         Animated.sequence([
           Animated.timing(star.scale, {
-            toValue: star.scale._value * 1.3,
+            toValue: star.initialScale * 1.3,
             duration: 1500 + Math.random() * 1500,
             useNativeDriver: true,
           }),
           Animated.timing(star.scale, {
-            toValue: star.scale._value * 0.8,
+            toValue: star.initialScale * 0.8,
             duration: 1500 + Math.random() * 1500,
             useNativeDriver: true,
           }),

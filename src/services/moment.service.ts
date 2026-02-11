@@ -377,7 +377,7 @@ export class MomentService {
         partnerId: string,
         callback: (moment: CoupleMoment | null) => void
     ): () => void {
-        let pollInterval: NodeJS.Timeout | null = null;
+        let pollInterval: ReturnType<typeof setTimeout> | null = null;
         let consecutiveErrors = 0;
         let lastErrorLogTime = 0;
         const ERROR_LOG_THROTTLE = 30000; // Only log errors every 30 seconds

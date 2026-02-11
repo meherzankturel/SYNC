@@ -43,9 +43,13 @@ export default function TicTacToeScreen() {
                         if (snap.exists()) {
                             setPartnerData(snap.data());
                         }
+                    }, (error: any) => {
+                        console.warn('[TicTacToe] Partner listener error:', error.code || error.message);
                     });
                 }
             }
+        }, (error: any) => {
+            console.warn('[TicTacToe] User listener error:', error.code || error.message);
         });
 
         return unsubscribe;
@@ -138,7 +142,7 @@ export default function TicTacToeScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView style={styles.container} edges={['top']}>
+            <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
                 <LinearGradient colors={[theme.colors.background, theme.colors.surface]} style={styles.gradient}>
                     <ActivityIndicator size="large" color={theme.colors.primary} />
                 </LinearGradient>
@@ -147,7 +151,7 @@ export default function TicTacToeScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             <LinearGradient colors={[theme.colors.background, theme.colors.surface]} style={styles.gradient}>
                 {/* Header */}
                 <View style={styles.header}>
@@ -261,15 +265,15 @@ const styles = StyleSheet.create({
         paddingVertical: theme.spacing.md,
     },
     backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: theme.spacing.xl,
+        height: theme.spacing.xl,
+        borderRadius: theme.borderRadius.full,
         backgroundColor: theme.colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
     },
     headerTitle: {
-        fontSize: 24,
+        fontSize: theme.typography.fontSize['2xl'],
         fontWeight: '700',
         color: theme.colors.text,
     },
